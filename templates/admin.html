@@ -2,91 +2,179 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Admin Automatizado - ESAQUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESAQUI | Painel Admin</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body style="background:#0f172a; color:white; padding:30px;">
-    <div style="max-width:1300px; margin:0 auto;">
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>📊 Painel de Controle de Fluxo de Caixa (Automatizado)</h2>
-            <a href="/admin/exportar-financeiro" style="background:#10b981; color:white; padding:12px 20px; font-weight:bold; border-radius:4px; text-decoration:none;">📥 Exportar para Excel (.xlsx)</a>
+<body class="admin-body">
+    <header class="topbar admin-topbar">
+        <div class="container nav-wrap">
+            <a href="/" class="brand">
+                <span class="brand-mark">E</span>
+                <span>ESAQUI</span>
+            </a>
+            <nav class="main-nav">
+                <a href="/admin/exportar-financeiro" class="btn btn-primary">Exportar Excel</a>
+                <a href="/logout" class="btn btn-ghost">Sair</a>
+            </nav>
         </div>
-        
-        <!-- INDICADORES EM AKZ DE ANGOLA -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-            <div style="background:#1e293b; padding:20px; border-radius:8px; border-left:6px solid #10b981;">
-                <h4>🟢 Total Arrecadado (Confirmado)</h4>
-                <h2 style="color:#10b981;">{{ faturado }} AKZ</h2>
+    </header>
+
+    <main class="admin-shell container">
+        <section class="admin-hero">
+            <div>
+                <span class="eyebrow">Dashboard administrativo</span>
+                <h1>Painel de controlo financeiro e académico</h1>
             </div>
-            <div style="background:#1e293b; padding:20px; border-radius:8px; border-left:6px solid #f59e0b;">
-                <h4>🟡 Total em Espera (Pendentes de Análise)</h4>
-                <h2 style="color:#f59e0b;">{{ pendente }} AKZ</h2>
+            <div class="admin-actions">
+                <a href="/assistencia-whatsapp" class="btn btn-primary" target="_blank">Atendimento WhatsApp</a>
             </div>
+        </section>
+
+        <div class="social-links-row admin-socials">
+            <a href="https://facebook.com/esaqui" target="_blank" rel="noreferrer">Facebook</a>
+            <a href="https://instagram.com/esaqui" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://www.tiktok.com/@esaqui" target="_blank" rel="noreferrer">TikTok</a>
         </div>
 
-        <!-- GRÁFICO AUTOMÁTICO EM BARRAS DINÂMICAS CSS (LIVRE DE LINHAS VERMELHAS) -->
-        <div style="background:#1e293b; padding:20px; border-radius:8px; margin-bottom:30px;">
-            <h4>📈 Monitoramento de Balanço de Caixa em Tempo Real</h4>
-            <div style="margin-top:15px;">
-                <p style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">Proporção Confirmada (Aprovada)</p>
-                <div style="background:#0f172a; width:100%; border-radius:4px; height:24px; margin-bottom:12px;">
-                    <!-- O Python injeta a largura exata calculada matematicamente -->
-                    <div style="background:#10b981; height:100%; border-radius:4px; font-size:11px; padding:3px 10px; width: {{ pct_faturado }}%;">Aprovados</div>
-                </div>
-                
-                <p style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">Proporção Retida (Em Validação)</p>
-                <div style="background:#0f172a; width:100%; border-radius:4px; height:24px;">
-                    <div style="background:#f59e0b; height:100%; border-radius:4px; font-size:11px; padding:3px 10px; width: {{ pct_pendente }}%;">Pendentes</div>
-                </div>
+        <section class="stats-grid admin-stats">
+            <div class="stat-box dark-box">
+                <strong>{{ faturado }} AKZ</strong>
+                <span>Total aprovado</span>
             </div>
-        </div>
+            <div class="stat-box dark-box">
+                <strong>{{ pendente }} AKZ</strong>
+                <span>Em validação</span>
+            </div>
+            <div class="stat-box dark-box">
+                <strong>{{ alunos|length }}</strong>
+                <span>Alunos inscritos</span>
+            </div>
+            <div class="stat-box dark-box">
+                <strong>{{ cursos|length }}</strong>
+                <span>Cursos ativos</span>
+            </div>
+        </section>
 
-        <div class="main-content" style="grid-template-columns: 2fr 1.2fr; padding:0; max-width:100%;">
-            <!-- CADERNETA E ENTRADA DE FATURAS -->
-            <div class="info-section" style="background:#1e293b; color:white; padding:0; border:none;">
-                <h3 style="color:#00ecff; margin-bottom:10px;">👥 Faturas em Aberto</h3>
+        <section class="admin-progress">
+            <div class="progress-header">
+                <span>Proporção de pagamentos</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill approved" style="width: {{ pct_faturado }}%;">Aprovados</div>
+            </div>
+            <div class="progress-bar secondary">
+                <div class="progress-fill pending" style="width: {{ pct_pendente }}%;">Pendentes</div>
+            </div>
+        </section>
+
+        <section class="admin-grid">
+            <div class="panel-table">
+                <div class="panel-head">
+                    <h3>Pagamentos e matrículas</h3>
+                </div>
                 <table>
                     <thead>
-                        <tr><th>Nome do Aluno</th><th>Cadeira Inscrita</th><th>Fatura/Print</th><th>Ações</th></tr>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Curso</th>
+                            <th>Comprovativo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for aluno in alunos %}
                         <tr>
-                            <td><b>{{ aluno.nome }}</b></td>
-                            <td><small>{{ aluno.curso_nome }}</small></td>
+                            <td>{{ aluno.nome }}</td>
+                            <td>{{ aluno.curso_nome }}</td>
                             <td>
                                 {% if aluno.comprovativo %}
-                                    <a href="{{ aluno.comprovativo }}" target="_blank" style="color:#00ecff; font-weight:bold; text-decoration:none;">👁️ Ver Fatura</a>
+                                <a href="{{ aluno.comprovativo }}" target="_blank">Ver</a>
                                 {% else %}
-                                    <span style="color:#64748b;">Aguardando Envio</span>
+                                <span class="muted">Sem envio</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="/admin/decidir-pagamento?aluno_id={{ aluno.id }}&acao=aprovar" class="btn-aprovar" style="padding:5px 10px; text-decoration:none; font-size:12px;">✓ Aprovar</a>
-                                <a href="/admin/decidir-pagamento?aluno_id={{ aluno.id }}&acao=rejeitar" class="btn-rejeitar" style="padding:5px 10px; text-decoration:none; font-size:12px; margin-left:5px;">✕</a>
+                                <span class="status-badge {% if aluno.status_pagamento == 'Aprovado' %}badge-aprovado{% elif aluno.status_pagamento == 'Rejeitado' %}badge-rejeitado{% else %}badge-pendente{% endif %}">{{ aluno.status_pagamento }}</span>
+                            </td>
+                            <td>
+                                <div class="inline-actions">
+                                    <a href="/admin/decidir-pagamento?aluno_id={{ aluno.id }}&acao=aprovar" class="small-btn success">Aprovar</a>
+                                    <a href="/admin/decidir-pagamento?aluno_id={{ aluno.id }}&acao=rejeitar" class="small-btn danger">Rejeitar</a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            
-            <!-- LISTA DE DISCIPLINAS ATIVAS NO ECOSSISTEMA -->
-            <div class="form-container-card" style="background:#1e293b; color:white; border:1px solid #334155;">
-                <h3 style="color:#00ecff;">📚 Grade de Cursos Ativos</h3>
-                <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px;">Os valores das propinas abaixo alimentam o gráfico automaticamente:</p>
-                <ul style="list-style:none; padding:0;">
-                    {% for curso in cursos %}
-                        <li style="padding:12px; background:#0f172a; border-radius:6px; margin-bottom:10px; border-left:4px solid #10b981;">
-                            <strong>{{ curso.nome }}</strong>
-                            <p style="font-size:13px; color:#10b981; font-weight:bold; margin-top:2px;">{{ curso.preco }} AKZ</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
 
-    </div>
+            <aside class="panel-stack">
+                <div class="admin-panel">
+                    <div class="panel-head">
+                        <h3>Criar curso</h3>
+                    </div>
+                    <form action="/admin/criar-curso" method="POST" enctype="multipart/form-data" class="admin-form">
+                        <div class="field-group">
+                            <label>Nome do curso</label>
+                            <input type="text" name="nome" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Descrição</label>
+                            <textarea name="descricao" rows="3" required></textarea>
+                        </div>
+                        <div class="field-group">
+                            <label>Preço (AKZ)</label>
+                            <input type="number" name="preco" min="0" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Vídeo de apresentação (URL)</label>
+                            <input type="url" name="video_apresentacao" placeholder="https://...">
+                        </div>
+                        <div class="field-group">
+                            <label>PDF do curso</label>
+                            <input type="file" name="pdf_file" accept="application/pdf">
+                        </div>
+                        <div class="field-group">
+                            <label>Ícone</label>
+                            <input type="text" name="icone" value="🎓" maxlength="4">
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width">Guardar curso</button>
+                    </form>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="panel-head">
+                        <h3>Adicionar vídeo de aula</h3>
+                    </div>
+                    <form action="/admin/upload-video" method="POST" enctype="multipart/form-data" class="admin-form">
+                        <div class="field-group">
+                            <label>Curso</label>
+                            <select name="curso_id" required>
+                                {% for curso in cursos %}
+                                <option value="{{ curso.id }}">{{ curso.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Módulo</label>
+                            <input type="text" name="modulo" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Título</label>
+                            <input type="text" name="titulo" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Arquivo de vídeo</label>
+                            <input type="file" name="video_file" accept="video/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width">Carregar aula</button>
+                    </form>
+                </div>
+            </aside>
+        </section>
+    </main>
 </body>
 </html>
+

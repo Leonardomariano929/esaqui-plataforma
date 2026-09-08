@@ -4,4 +4,5 @@ python-multipart
 openpyxl
 reportlab
 bcrypt
+cryptography
 aiofiles

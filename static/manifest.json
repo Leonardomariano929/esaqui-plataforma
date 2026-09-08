@@ -1,0 +1,24 @@
+{
+  "name": "ESAQUI | Formação | Tecnologia | Gestão",
+  "short_name": "ESAQUI",
+  "description": "Plataforma de formação digital da ESAQUI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061929",
+  "theme_color": "#0d5cdb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/fotos/padrao.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/fotos/padrao.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

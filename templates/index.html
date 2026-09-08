@@ -2,81 +2,310 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <title>Minhas Aulas - ESAQUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0d5cdb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ESAQUI">
+    <title>ESAQUI | Formação | Tecnologia | Gestão</title>
+    <meta name="description" content="ESAQUI - Formação profissional em tecnologia, gestão e negócios.">
     <link rel="stylesheet" href="/static/style.css">
-
-    <head>
-    <meta charset="UTF-8">
-    <!-- Faz com que a tela do celular se autoajuste sem zoom quebrado -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESAQUI - Mobile & App</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <!-- Vincula as configurações profissionais do aplicativo móvel -->
     <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/fotos/padrao.png">
 </head>
 <body>
-    <header>
-        <a href="/" class="logo">ESAQUI</a>
-        <!-- BOTÃO FLUTUANTE QUE APARECE APENAS NO TELEMÓVEL -->
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <header class="topbar">
+        <div class="container nav-wrap">
+            <a href="/" class="brand">
+                <span class="brand-mark">E</span>
+                <span>ESAQUI</span>
+            </a>
+            <nav class="main-nav" aria-label="Navegação principal">
+                <a href="#cursos">Cursos</a>
+                <a href="#metodologia">Metodologia</a>
+                <a href="#precos">Preços</a>
+                <a href="#suporte">Suporte</a>
+                <a href="/assistencia-whatsapp?mensagem=Olá%2C+gostaria+de+assist%C3%AAncia+da+ESAQUI." class="btn btn-primary">WhatsApp</a>
+                <a href="/cadastro" class="btn btn-primary">Matrícula</a>
+                <a href="/baixar-app" class="btn btn-secondary">Baixar App</a>
+                <a href="/login" class="btn btn-ghost">Login</a>
+            </nav>
+        </div>
     </header>
-    
-    <nav id="navbarPrincipal">
-        <a class="nav-btn" href="/">Início</a>
-        <a class="nav-btn" href="/cadastro">Matrícula</a>
-        <a class="nav-btn" href="/login">Área do Aluno</a>
-    </nav>
 
-    <!-- O restante do conteúdo da main-content do index continua igual... -->
+    <main>
+        <section class="hero">
+            <div class="container hero-layout">
+                <div class="hero-copy">
+                    <span class="eyebrow">Formação premium para pessoas e negócios</span>
+                    <h1>Treine competências digitais, empresariais e técnicas com a ESAQUI.</h1>
+                    <p>Aprenda com professores especialistas, materiais prontos para download e um suporte profissional orientado para resultados reais.</p>
+                    <div class="hero-actions">
+                        <a href="/cadastro" class="btn btn-primary large">Começar agora</a>
+                        <a href="#cursos" class="btn btn-secondary large">Ver cursos</a>
+                        <a href="/baixar-app" class="btn btn-ghost large">Baixar App</a>
+                        <a href="/assistencia-whatsapp?mensagem=Olá%2C+gostaria+de+assist%C3%AAncia+da+ESAQUI." class="btn btn-ghost large">Suporte WhatsApp</a>
+                    </div>
+                    <ul class="hero-points">
+                        <li>✅ Aulas em vídeo e materiais digitais</li>
+                        <li>✅ Certificação e acompanhamento técnico</li>
+                        <li>✅ Acesso remoto via WhatsApp</li>
+                    </ul>
+                </div>
 
-    <!-- Script nativo para abrir o Menu de Canto e registrar o App no celular -->
+                <div class="hero-visual">
+                    <div class="slide-panel">
+                        <div class="slide-badge">Em destaque</div>
+                        <h3>Gestão Comercial Primavera v10</h3>
+                        <p>Faturação, stock, clientes e controle operacional em um ambiente de negócios real.</p>
+                        <div class="slide-meta">
+                            <span>12 módulos</span>
+                            <span>+1.200 alunos</span>
+                        </div>
+                    </div>
+                    <div class="video-card">
+                        <iframe src="https://www.youtube.com/embed/ScMzIvxBSi4?si=0R9q9dXwqUzUEZwC" title="Curso ESAQUI apresentação" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <div class="container stats-grid">
+                <div class="stat-box">
+                    <strong>+1.200</strong>
+                    <span>Alunos ativos</span>
+                </div>
+                <div class="stat-box">
+                    <strong>94%</strong>
+                    <span>Satisfação</span>
+                </div>
+                <div class="stat-box">
+                    <strong>18</strong>
+                    <span>Especialidades</span>
+                </div>
+                <div class="stat-box">
+                    <strong>24/7</strong>
+                    <span>Suporte técnico</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="cursos">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="eyebrow">Cursos disponíveis</span>
+                    <h2>Formações desenvolvidas para o mercado real</h2>
+                </div>
+
+                <div class="course-grid">
+                    {% for curso in cursos %}
+                    <article class="course-card">
+                        <div class="course-icon">{{ curso.icone or '🎓' }}</div>
+                        <h3>{{ curso.nome }}</h3>
+                        <p>{{ curso.descricao }}</p>
+                        <div class="course-meta">
+                            <span>{{ curso.preco }} AKZ</span>
+                            <a href="/curso/{{ curso.id }}">Ver detalhes</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="section alt-bg" id="metodologia">
+            <div class="container two-col">
+                <div>
+                    <span class="eyebrow">Como funciona</span>
+                    <h2>Uma experiência de aprendizagem prática, moderna e profissional.</h2>
+                    <ul class="feature-list">
+                        <li><strong>Videoaulas estruturadas</strong> por módulo, com conteúdo objetivo e aplicável ao trabalho.</li>
+                        <li><strong>Materiais em PDF</strong> para consulta e estudo.</li>
+                        <li><strong>Acompanhamento técnico</strong> por professores e suporte administrativo.</li>
+                        <li><strong>Certificação</strong> após avaliação e conclusão.</li>
+                    </ul>
+                </div>
+
+                <div class="feature-panel">
+                    <div class="mini-card">
+                        <span>🎬</span>
+                        <div>
+                            <h4>Conteúdo em vídeo</h4>
+                            <p>Vídeos organizados por tema e módulo.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <span>📄</span>
+                        <div>
+                            <h4>Fichas e PDFs</h4>
+                            <p>Documentos e recursos para reforço do estudo.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <span>💬</span>
+                        <div>
+                            <h4>Suporte direto</h4>
+                            <p>Atendimento por WhatsApp, chat e e-mail.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="precos">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="eyebrow">Planos e investimento</span>
+                    <h2>Escolha a formação ideal para o seu objetivo</h2>
+                </div>
+
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="plan-tag">Básico</div>
+                        <h3>Starter</h3>
+                        <div class="price">20.000 <small>AKZ</small></div>
+                        <ul>
+                            <li>1 curso</li>
+                            <li>Videoaulas</li>
+                            <li>Materiais básicos</li>
+                        </ul>
+                        <a href="/cadastro" class="btn btn-secondary">Inscrever-se</a>
+                    </div>
+
+                    <div class="pricing-card featured-plan">
+                        <div class="plan-tag">Mais popular</div>
+                        <h3>Pro</h3>
+                        <div class="price">35.000 <small>AKZ</small></div>
+                        <ul>
+                            <li>Todos os módulos</li>
+                            <li>Atendimento prioritário</li>
+                            <li>PDFs e suporte</li>
+                        </ul>
+                        <a href="/cadastro" class="btn btn-primary">Inscrever-se</a>
+                    </div>
+
+                    <div class="pricing-card">
+                        <div class="plan-tag">Executivo</div>
+                        <h3>Business</h3>
+                        <div class="price">55.000 <small>AKZ</small></div>
+                        <ul>
+                            <li>Certificação</li>
+                            <li>Mentoria</li>
+                            <li>Suporte avançado</li>
+                        </ul>
+                        <a href="/cadastro" class="btn btn-secondary">Inscrever-se</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section assistant-section" id="suporte">
+            <div class="container assistant-layout">
+                <div>
+                    <span class="eyebrow">Assistente inteligente</span>
+                    <h2>Encontre respostas rápidas sobre cursos, pagamentos e materiais.</h2>
+                    <p>O assistente oferece apoio em tempo real, responde dúvidas comuns e ajuda o aluno a localizar informações importantes sobre a formação.</p>
+                </div>
+
+                <div class="assistant-panel">
+                    <div class="assistant-chat">
+                        <div class="message bot">Olá! Posso ajudar com matrículas, pagamentos e materiais da ESAQUI.</div>
+                        <div class="message user">Quero saber sobre o curso de primavera.</div>
+                        <div class="message bot">O curso de Gestão Comercial Primavera v10 cobre faturação, gestão de stocks e operação comercial.</div>
+                    </div>
+                    <form id="assistantForm" class="assistant-form">
+                        <input type="text" id="assistantInput" placeholder="Escreva a sua dúvida..." aria-label="Mensagem do assistente" />
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="section alt-bg" id="download">
+            <div class="container download-shell">
+                <div class="section-heading center">
+                    <span class="eyebrow">Aplicação ESAQUI</span>
+                    <h2>Instale a app e acompanhe a formação offline</h2>
+                </div>
+                <div class="download-card">
+                    <div>
+                        <h3>Disponível para Android, iPhone e desktop</h3>
+                        <p>Use o modo de instalação da web em qualquer navegador e o site funciona em modo offline com cache do PWA.</p>
+                    </div>
+                    <div class="download-actions">
+                        <button type="button" class="btn btn-primary" data-install-app hidden>Instalar app</button>
+                        <a href="/assistencia-whatsapp?mensagem=Olá%2C+gostaria+de+baixar+a+app+ESAQUI." class="btn btn-primary">Android / iPhone</a>
+                        <a href="https://play.google.com" class="btn btn-secondary" target="_blank" rel="noreferrer">Google Play</a>
+                        <a href="https://apps.microsoft.com" class="btn btn-secondary" target="_blank" rel="noreferrer">Microsoft Store</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div>
+                <div class="brand footer-brand">
+                    <span class="brand-mark">E</span>
+                    <span>ESAQUI</span>
+                </div>
+                <p>Formação | tecnologia | gestão.</p>
+            </div>
+            <div>
+                <h4>Links rápidos</h4>
+                <ul>
+                    <li><a href="#cursos">Cursos</a></li>
+                    <li><a href="/cadastro">Matrícula</a></li>
+                    <li><a href="/baixar-app">Baixar app</a></li>
+                    <li><a href="/login">Área do aluno</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contato</h4>
+                <ul>
+                    <li>📞 +244 923 000 000</li>
+                    <li>📧 suporte@esaqui.com</li>
+                    <li><a href="/assistencia-whatsapp?mensagem=Olá%2C+gostaria+de+assist%C3%AAncia+da+ESAQUI." aria-label="Abrir WhatsApp da ESAQUI">💬 WhatsApp</a></li>
+                    <li><a href="https://facebook.com/esaqui" target="_blank" rel="noreferrer">Facebook</a></li>
+                    <li><a href="https://instagram.com/esaqui" target="_blank" rel="noreferrer">Instagram</a></li>
+                    <li><a href="https://www.tiktok.com/@esaqui" target="_blank" rel="noreferrer">TikTok</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 ESAQUI - Formação | Tecnologia | Gestão.
+        </div>
+    </footer>
+
     <script src="/static/app.js"></script>
-</body>
-</head>
-<body>
-    <header>
-        <span class="logo">ESAQUI - Sala de Aulas</span>
-        <a href="/login" class="nav-btn" style="color:red; background:white; padding:5px 10px; border-radius:4px;">Terminar Sessão</a>
-    </header>
-    <div class="main-content">
-        <div class="info-section">
-            <h3>Nossos Cursos Disponíveis</h3>
-            <p style="margin-bottom: 15px;">Selecione uma formação e faça a sua matrícula oficial:</p>
-            
-            <!-- Loop dinâmico que exibe os cursos inseridos pelo Administrador -->
-            <div style="display:grid; gap:15px; margin-bottom: 25px;">
-                {% for curso in cursos %}
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:6px;">
-                    <strong style="color:#003366; font-size:16px;">🎓 {{ curso.nome }}</strong>
-                    <p style="font-size:13px; color:#555; margin-top:5px;">{{ curso.descricao }}</p>
-                </div>
-                {% endfor %}
-            </div>
+    <script>
+        const assistantForm = document.getElementById('assistantForm');
+        const assistantInput = document.getElementById('assistantInput');
+        if (assistantForm && assistantInput) {
+            assistantForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const value = assistantInput.value.trim();
+                if (!value) return;
+                const chat = document.querySelector('.assistant-chat');
+                const messageUser = document.createElement('div');
+                messageUser.className = 'message user';
+                messageUser.textContent = value;
+                chat.appendChild(messageUser);
+                assistantInput.value = '';
 
-            <h3>💳 Dados para Pagamento Seguro</h3>
-            <div class="payment-grid">
-                <div class="payment-card">
-                    <strong>Multicaixa Express</strong>
-                    <p>923 000 000</p>
-                </div>
-                <div class="payment-card">
-                    <strong>IBAN Bancário</strong>
-                    <p>AO06 0040 0000 1234 5678 1019 1</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- JANELA MODAL DO REPRODUTOR DE VÍDEO -->
-    <div id="videoModal" class="modal-video">
-        <div class="modal-video-content">
-            <button class="close-modal" onclick="fecharVideo()">✕ Fechar Aula</button>
-            <video id="playerVideo" width="100%" controls controlsList="nodownload" autoplay>
-                <source id="videoSource" src="" type="video/mp4">
-                Seu navegador não suporta a reprodução de vídeos locais.
-            </video>
-        </div>
-    </div>
-
-    <script src="javascript/modal.js"></script>
+                const formData = new FormData();
+                formData.append('mensagem', value);
+                const response = await fetch('/assistente-bot', { method: 'POST', body: formData });
+                const data = await response.json();
+                const messageBot = document.createElement('div');
+                messageBot.className = 'message bot';
+                messageBot.textContent = data.resposta || 'Sem resposta disponível.';
+                chat.appendChild(messageBot);
+                chat.scrollTop = chat.scrollHeight;
+            });
+        }
+    </script>
 </body>
 </html>

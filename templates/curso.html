@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ curso.nome }} | ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container nav-wrap">
+            <a href="/" class="brand">
+                <span class="brand-mark">E</span>
+                <span>ESAQUI</span>
+            </a>
+            <nav class="main-nav">
+                <a href="/cadastro" class="btn btn-primary">Matrícula</a>
+                <a href="/login" class="btn btn-ghost">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container section">
+        <div class="two-col">
+            <div>
+                <span class="eyebrow">Curso</span>
+                <h1>{{ curso.nome }}</h1>
+                <p>{{ curso.descricao }}</p>
+                <div class="course-meta" style="justify-content:flex-start; margin-top:16px;">
+                    <span>{{ curso.preco }} AKZ</span>
+                    <a href="/cadastro">Inscrever-se</a>
+                </div>
+
+                {% if curso.pdf_url %}
+                <div style="margin-top:24px;">
+                    <a class="btn btn-primary" href="{{ curso.pdf_url }}" target="_blank">Baixar material em PDF</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="feature-panel">
+                {% if curso.video_apresentacao %}
+                <div class="video-card">
+                    <iframe src="{{ curso.video_apresentacao.replace('watch?v=', 'embed/') }}" title="Video de apresentação do curso" allowfullscreen></iframe>
+                </div>
+                {% else %}
+                <div class="mini-card">
+                    <span>🎓</span>
+                    <div>
+                        <h4>Aprenda com a ESAQUI</h4>
+                        <p>Vídeo e materiais digitais reservados para cada formação.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

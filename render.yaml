@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: esaqui-plataforma
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn esaqui:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: ESAQUI_SECRET_KEY
+        value: "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"
+      - key: WHATSAPP_NUMBER
+        value: "244923000000"
+      - key: WHATSAPP_MESSAGE
+        value: "Olá, gostaria de assistência remota da ESAQUI."

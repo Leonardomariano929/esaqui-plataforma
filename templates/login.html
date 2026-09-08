@@ -2,24 +2,37 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESAQUI - Login</title>
-        <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-    <div class="box">
-        <h2>Entrar na Plataforma</h2>
-        {% if erro %} <div class="error">{{ erro }}</div> {% endif %}
-        <form action="/login" method="POST">
-            <label>E-mail</label>
-            <input type="email" name="email" required>
-            <label>Senha</label>
-            <input type="password" name="senha" required>
-            <button type="submit" class="btn">Acessar Área Restrita</button>
-        </form>
+<body class="auth-page">
+    <div class="auth-shell">
+        <div class="auth-card">
+            <div class="auth-brand">ESAQUI</div>
+            <h2>Entrar na plataforma</h2>
+            {% if erro %}<div class="error-box">{{ erro }}</div>{% endif %}
+
+            <form action="/login" method="POST" class="auth-form">
+                <div class="field-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="field-group">
+                    <label>Senha</label>
+                    <input type="password" name="senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Acessar área restrita</button>
+            </form>
+
+            <div class="form-toggle-links social-links-row">
+                <a href="https://facebook.com/esaqui" target="_blank" rel="noreferrer">Facebook</a>
+                <a href="https://instagram.com/esaqui" target="_blank" rel="noreferrer">Instagram</a>
+                <a href="https://www.tiktok.com/@esaqui" target="_blank" rel="noreferrer">TikTok</a>
+                <a href="/recuperar">Esqueceu-se da sua senha?</a>
+                <a href="/cadastro">Criar conta</a>
+            </div>
+        </div>
     </div>
-    
-    <div class="form-toggle-links" style="margin-top:15px;">
-    <a href="/recuperar">Esqueceu-se da sua senha? Clique aqui</a>
-</div>
 </body>
 </html>

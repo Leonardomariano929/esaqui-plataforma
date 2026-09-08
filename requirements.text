@@ -1,7 +1,0 @@
-fastapi[standard]
-jinja2
-python-multipart
-openpyxl
-reportlab
-bcrypt
-aiofiles
