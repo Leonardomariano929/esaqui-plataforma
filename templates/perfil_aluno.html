@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8"><title>Meu Perfil - ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <span class="logo">ESAQUI - Definições de Conta</span>
+        <a href="/dashboard?aluno_id={{ aluno.id }}" class="nav-btn" style="background:#1e293b; border-radius:4px; padding:5px 12px;">← Voltar às Aulas</a>
+    </header>
+    <div class="box" style="width:450px; margin-top:30px;">
+        <h3>👤 Meu Perfil de Aluno</h3>
+        
+        <!-- CORREÇÃO: FOTO MAIOR, COM EFEITO HOVER E CLICÁVEL PARA ZOOM -->
+        <div style="text-align: center; margin: 20px 0;">
+            <img src="{{ aluno.foto }}" alt="Foto de Perfil" class="foto-perfil-clicavel" onclick="abrirZoom('{{ aluno.foto }}')" title="Clique para ampliar a foto">
+            <p style="font-size:11px; color:#777; margin-top:5px;">💡 Clique na foto para ampliar</p>
+        </div>
+        
+        {% if sucesso %} <div class="status-badge badge-aprovado" style="display:block; text-align:center; margin-bottom:15px; padding:10px;">{{ sucesso }}</div> {% endif %}
+        
+        <form action="/perfil-aluno/atualizar?aluno_id={{ aluno.id }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group"><label>Alterar Foto de Perfil</label><input type="file" name="foto_file" accept="image/*" style="border:none; padding:5px 0; height:auto;"></div>
+            <div class="form-group"><label>Nome Completo</label><input type="text" name="nome" value="{{ aluno.nome }}" required></div>
+            <div class="form-group"><label>Contacto Telefónico</label><input type="text" name="telefone" value="{{ aluno.telefone }}" required></div>
+            <div class="form-group"><label>E-mail Registado</label><input type="email" name="email" value="{{ aluno.email }}" required></div>
+            <button type="submit" class="btn-submit" style="background:#1e3a8a; margin-top:15px;">Ajustar Meus Dados</button>
+        </form>
+    </div>
+
+    <!-- ADICIONE ESTA JANELA DE ZOOM TAMBÉM NO FIM DO PERFIL DO ALUNO -->
+    <div id="zoomModal" class="zoom-modal" onclick="fecharZoom()">
+        <img id="imgZoomed" src="" alt="Zoom">
+    </div>
+
+    <script src="/templates/javascript/perfil_aluno.js"></script>
+</body>
+</html>

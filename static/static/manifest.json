@@ -1,0 +1,16 @@
+{
+  "name": "ESAQUI Plataforma de Formação",
+  "short_name": "ESAQUI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#003366",
+  "theme_color": "#003366",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

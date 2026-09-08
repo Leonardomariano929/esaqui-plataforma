@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8"><title>Suporte Técnico - ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="background:#f1f5f9; padding:20px;">
+    <div class="box" style="width:500px; margin:0 auto; height:90vh; display:flex; flex-direction:column;">
+        <h3>🛠️ Canal de Suporte Técnico</h3>
+        <div style="flex:1; background:#fff; border:1px solid #ccc; border-radius:4px; padding:15px; overflow-y:auto; margin:15px 0;">
+            {% for c in historico %}
+                <p style="margin-bottom:10px; text-align:{% if c.remetente == 'aluno' %}right{% else %}left{% endif %};">
+                    <span style="background:{% if c.remetente == 'aluno' %}#2563eb; color:white;{% else %}#e2e8f0; color:#333;{% endif %}; padding:6px 12px; border-radius:12px; display:inline-block;">
+                        {{ c.conteudo }} <small style="font-size:9px; opacity:0.7; display:block;">{{ c.data_envio }}</small>
+                    </span>
+                </p>
+            {% endfor %}
+        </div>
+        <form action="/chat-aluno/enviar?aluno_id={{ aluno_id }}" method="POST" style="display:flex; gap:5px;">
+            <input type="text" name="conteudo" placeholder="Descreva o erro no Primavera..." required style="flex:1;">
+            <button type="submit" class="btn-submit" style="width:auto; margin:0; padding:10px 20px;">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

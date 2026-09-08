@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>Minhas Aulas - ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <head>
+    <meta charset="UTF-8">
+    <!-- Faz com que a tela do celular se autoajuste sem zoom quebrado -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESAQUI - Mobile & App</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Vincula as configurações profissionais do aplicativo móvel -->
+    <link rel="manifest" href="/static/manifest.json">
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">ESAQUI</a>
+        <!-- BOTÃO FLUTUANTE QUE APARECE APENAS NO TELEMÓVEL -->
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    </header>
+    
+    <nav id="navbarPrincipal">
+        <a class="nav-btn" href="/">Início</a>
+        <a class="nav-btn" href="/cadastro">Matrícula</a>
+        <a class="nav-btn" href="/login">Área do Aluno</a>
+    </nav>
+
+    <!-- O restante do conteúdo da main-content do index continua igual... -->
+
+    <!-- Script nativo para abrir o Menu de Canto e registrar o App no celular -->
+    <script src="/static/app.js"></script>
+</body>
+</head>
+<body>
+    <header>
+        <span class="logo">ESAQUI - Sala de Aulas</span>
+        <a href="/login" class="nav-btn" style="color:red; background:white; padding:5px 10px; border-radius:4px;">Terminar Sessão</a>
+    </header>
+    <div class="main-content">
+        <div class="info-section">
+            <h3>Nossos Cursos Disponíveis</h3>
+            <p style="margin-bottom: 15px;">Selecione uma formação e faça a sua matrícula oficial:</p>
+            
+            <!-- Loop dinâmico que exibe os cursos inseridos pelo Administrador -->
+            <div style="display:grid; gap:15px; margin-bottom: 25px;">
+                {% for curso in cursos %}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:6px;">
+                    <strong style="color:#003366; font-size:16px;">🎓 {{ curso.nome }}</strong>
+                    <p style="font-size:13px; color:#555; margin-top:5px;">{{ curso.descricao }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3>💳 Dados para Pagamento Seguro</h3>
+            <div class="payment-grid">
+                <div class="payment-card">
+                    <strong>Multicaixa Express</strong>
+                    <p>923 000 000</p>
+                </div>
+                <div class="payment-card">
+                    <strong>IBAN Bancário</strong>
+                    <p>AO06 0040 0000 1234 5678 1019 1</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JANELA MODAL DO REPRODUTOR DE VÍDEO -->
+    <div id="videoModal" class="modal-video">
+        <div class="modal-video-content">
+            <button class="close-modal" onclick="fecharVideo()">✕ Fechar Aula</button>
+            <video id="playerVideo" width="100%" controls controlsList="nodownload" autoplay>
+                <source id="videoSource" src="" type="video/mp4">
+                Seu navegador não suporta a reprodução de vídeos locais.
+            </video>
+        </div>
+    </div>
+
+    <script src="javascript/modal.js"></script>
+</body>
+</html>

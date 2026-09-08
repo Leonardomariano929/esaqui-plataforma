@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>Avaliação Oficial - ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="box" style="width: 550px;">
+        <h2>📝 Exame de Avaliação Técnica</h2>
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">Responda corretamente para habilitar a emissão do certificado.</p>
+        <form action="/submeter-prova?aluno_id={{ aluno_id }}" method="POST">
+            {% for p in perguntas %}
+            <div style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <strong>{{ loop.index }}. {{ p.texto }}</strong>
+                <label style="display:block; margin-top:8px;"><input type="radio" name="q{{ p.id }}" value="a" required> A) {{ p.a }}</label>
+                <label style="display:block; margin-top:4px;"><input type="radio" name="q{{ p.id }}" value="b"> B) {{ p.b }}</label>
+                <label style="display:block; margin-top:4px;"><input type="radio" name="q{{ p.id }}" value="c"> C) {{ p.c }}</label>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-submit">Enviar Minhas Respostas</button>
+        </form>
+    </div>
+</body>
+</html>
+📄 templates/dashboard.html (Painel do Aluno Integrado com Provas)Substitua o arquivo por este, que inclui o acesso à Prova:html

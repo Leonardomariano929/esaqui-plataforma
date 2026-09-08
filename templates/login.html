@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>ESAQUI - Login</title>
+        <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="box">
+        <h2>Entrar na Plataforma</h2>
+        {% if erro %} <div class="error">{{ erro }}</div> {% endif %}
+        <form action="/login" method="POST">
+            <label>E-mail</label>
+            <input type="email" name="email" required>
+            <label>Senha</label>
+            <input type="password" name="senha" required>
+            <button type="submit" class="btn">Acessar Área Restrita</button>
+        </form>
+    </div>
+    
+    <div class="form-toggle-links" style="margin-top:15px;">
+    <a href="/recuperar">Esqueceu-se da sua senha? Clique aqui</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>ESAQUI - Cadastro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="box" style="width: 450px;">
+        <h2>Fazer Matrícula - ESAQUI</h2>
+        {% if erro %} <div class="error">{{ erro }}</div> {% endif %}
+        <form action="/cadastro" method="POST">
+            <div class="form-group">
+                <label>Escolha o Curso Pretendido</label>
+                <select name="curso_id" required style="width:100%; padding:10px; border-radius:4px; border:1px solid #ccc;">
+                    {% for curso in courses if cursos %}
+                        <!-- Proteção opcional jinja -->
+                    {% endfor %}
+                    {% for curso in cursos %}
+                        <option value="{{ curso.id }}">{{ curso.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><label>Nome Completo</label><input type="text" name="nome" required></div>
+            <div class="form-group"><label>E-mail</label><input type="email" name="email" required></div>
+            <div class="form-group"><label>Telefone</label><input type="text" name="telefone" required></div>
+            <div class="form-group"><label>Senha (Mínimo 8 dígitos)</label><input type="password" name="senha" minlength="8" required></div>
+            
+            <hr style="margin:20px 0; border:0; border-top:1px solid #ddd;">
+            <h4 style="color:#003366; margin-bottom:10px;">🔒 Autenticação de Segurança (Recuperar Senha)</h4>
+            
+            <div class="form-group">
+                <label>Pergunta Secreta</label>
+                <select name="pergunta" required style="width:100%; padding:10px; border-radius:4px; border:1px solid #ccc;">
+                    <option value="Nome do seu primeiro animal de estimação">Nome do seu primeiro animal de estimação?</option>
+                    <option value="Nome da sua primeira escola">Nome da sua primeira escola?</option>
+                    <option value="Cidade onde os seus pais se conheceram">Cidade onde os seus pais se conheceram?</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Sua Resposta Secreta</label><input type="text" name="resposta" required></div>
+            
+            <button type="submit" class="btn-submit">Submeter Inscrição</button>
+            <div class="form-toggle-links"><a href="/login">Já tem conta? Faça Login aqui</a></div>
+        </form>
+    </div>
+</body>
+</html>

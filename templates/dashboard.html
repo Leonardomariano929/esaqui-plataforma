@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>Sala de Aula - ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <span class="logo">ESAQUI - Aluno</span>
+        <div>
+            <!-- BOTÃO DO CHAT DE SUPORTE DIRETO COM O TÉCNICO -->
+            <a href="/chat-aluno?aluno_id={{ aluno_id }}" target="_blank" style="background:#00ecff; color:#0f172a; padding:6px 12px; border-radius:4px; text-decoration:none; font-weight:bold; margin-right:15px;">🛠️ Chamar Suporte Técnico</a>
+            <a href="/login" class="nav-btn" style="color:red; background:white; padding:5px 10px; border-radius:4px;">Sair</a>
+            <a href="/perfil-aluno?aluno_id={{ aluno_id }}" style="background:#1e293b; color:white; padding:6px 12px; border-radius:4px; text-decoration:none; font-weight:bold; margin-right:10px;">👤 Meu Perfil</a>
+        </div>
+    </header>
+    <div class="main-content">
+        <div class="info-section">
+            <div style="background:#f1f5f9; padding:15px; border-radius:6px; margin-bottom:20px;">
+                <h4>✍️ Status do Exame de Avaliação: 
+                    {% if nota %}
+                        {% if nota.resultado == 'Aprovado' %}
+                            <strong style="color: #10b981;">Aprovado (Nota: {{ nota.nota }}/20)</strong>
+                        {% else %}
+                            <strong style="color: #ef4444;">Reprovado (Nota: {{ nota.nota }}/20)</strong>
+                        {% endif %}
+                    {% else %}
+                        <a href="/prova?aluno_id={{ aluno_id }}" style="color:#2563eb; font-weight:bold;">Clique aqui para fazer a sua prova</a>
+                    {% endif %}
+                </h4>
+            </div>
+
+           <h3>🎬 Suas Videoaulas Oficiais</h3>
+
+<!-- Se o aluno ainda não enviou o documento, bloqueamos a interface de estudos -->
+{% if status_pagamento == 'Não Enviado' %}
+    <div style="background: #fee2e2; border-left: 5px solid #dc2626; padding: 15px; border-radius: 6px; color: #991b1b; margin-top: 10px; font-weight: bold;">
+        🔒 Aulas Bloqueadas: É obrigatório anexar o print do Multicaixa Express ou o comprovativo do IBAN no formulário lateral para libertar o seu acesso técnico.
+    </div>
+{% else %}
+    <!-- Se já enviou, a tabela funciona normalmente -->
+    <table>
+        <thead>
+            <tr><th>Módulo</th><th>Título</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+            {% for aula in aulas %}
+            <tr>
+                <td>{{ aula.modulo }}</td>
+                <td>{{ aula.titulo }}</td>
+                <td><button onclick="abrirVideo('{{ aula.url_video }}')" class="btn-aprovar" style="background:#2563eb;">▶ Assistir</button></td>
+            </tr>
+            {% else %}
+                <tr><td colspan="3" style="color:#666;">O pagamento está em análise. As suas aulas serão listadas aqui assim que o administrador validar.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+      <!-- BLOCCO DO ASSISTENTE VIRTUAL CORRIGIDO -->
+        <div class="form-container-card">
+            <h3 style="color:#1e3a8a; margin-bottom: 5px;">🤖 Assistente Virtual ESAQUI</h3>
+            <p style="font-size:12px; color:#555; margin-bottom:12px;">Pergunte sobre faturamento, certificados, propinas ou ementas das disciplinas.</p>
+            
+            <div id="chatBotLog" style="background:#0f172a; color:#00ecff; padding:12px; border-radius:6px; height:140px; overflow-y:auto; font-family:monospace; font-size:13px; margin-bottom:12px; border: 1px solid #334155;">
+                Bot: Olá! Como posso ajudar nas suas instruções de formação hoje?
+            </div>
+            
+            <!-- Campo corrigido sem restrição de altura esmagada -->
+            <div style="display:flex; gap:8px; align-items: center;">
+                <input type="text" id="botInput" placeholder="Escreva a sua dúvida aqui..." style="flex:1; border:1px solid #bbb; padding: 0 10px; border-radius:6px;">
+                <button type="button" onclick="perguntarAoBot()" style="background:#1e3a8a; color:white; border:none; padding:0 15px; height:46px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; width:auto;">Perguntar</button>
+            </div>
+            
+            <hr style="margin:20px 0; border:0; border-top:1px solid #ddd;">
+
+            <h3>📄 Envio de Faturas / Comprovativos</h3>
+            <p style="margin-bottom:10px;">Estado Atual do Pagamento: <strong>{{ status_pagamento }}</strong></p>
+            <form action="/upload-comprovativo?aluno_id={{ aluno_id }}" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" required style="border:none; margin-bottom:10px;"><br>
+                <button type="submit" class="btn-submit">Enviar Comprovativo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JANELA DE ZOOM DA FOTO DE PERFIL (LIGHTBOX) -->
+    <div id="zoomModal" class="zoom-modal" onclick="fecharZoom()">
+        <img id="imgZoomed" src="" alt="Zoom da Foto">
+    </div>
+    
+    <script src="/templates/javascript/modal.js"></script>
+</body>
+</html>

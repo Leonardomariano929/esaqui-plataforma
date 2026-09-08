@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8"><title>Responder Suporte - Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="background:#0f172a; padding:20px; color:white;">
+    <div class="box" style="width:500px; margin:0 auto; height:90vh; display:flex; flex-direction:column; background:#1e293b; border:1px solid #334155;">
+        <h3 style="color:#00ecff;">💬 Atendimento: {{ aluno_nome }}</h3>
+        <div style="flex:1; background:#0f172a; border:1px solid #475569; border-radius:4px; padding:15px; overflow-y:auto; margin:15px 0;">
+            {% for c in historico %}
+                <p style="margin-bottom:10px; text-align:{% if c.remetente == 'admin' %}right{% else %}left{% endif %};">
+                    <span style="background:{% if c.remetente == 'admin' %}#10b981; color:white;{% else %}#334155; color:white;{% endif %}; padding:6px 12px; border-radius:12px; display:inline-block;">
+                        {{ c.conteudo }} <small style="font-size:9px; opacity:0.7; display:block;">{{ c.data_envio }}</small>
+                    </span>
+                </p>
+            {% endfor %}
+        </div>
+        <form action="/chat-admin/enviar?aluno_id={{ aluno_id }}" method="POST" style="display:flex; gap:5px;">
+            <input type="text" name="conteudo" placeholder="Digite a solução técnica..." required style="flex:1; background:#0f172a; color:white; border:1px solid #475569;">
+            <button type="submit" class="btn-submit" style="width:auto; margin:0; padding:10px 20px; background:#10b981;">Responder</button>
+        </form>
+    </div>
+</body>
+</html>
