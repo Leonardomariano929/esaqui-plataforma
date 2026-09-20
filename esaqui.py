@@ -26,7 +26,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from fastapi.responses import Response
-from esaqui.py import app
+from esaqui import app
     
 @app.get("/sitemap.xml")
 async def get_sitemap():
