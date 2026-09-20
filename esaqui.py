@@ -25,23 +25,6 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
-    
-@app.get("/sitemap.xml")
-async def get_sitemap():
-    from fastapi.responses import Response  # Importado aqui dentro para evitar erros
-    
-    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://sitemaps.org" xmlns:xhtml="http://w3.org">
-  <url><loc>https://onrender.com</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>1.0000</priority></url>
-  <url><loc>https://onrender.comcadastro</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comlogin</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comcurso/1</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comcurso/2</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comcurso/3</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comcurso/4</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
-  <url><loc>https://onrender.comrecuperar</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.6400</priority></url>
-</urlset>"""
-    return Response(content=xml_content, media_type="application/xml")
 
 app = FastAPI(title="ESAQUI - Sistema Automatizado")
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("ESAQUI_SECRET_KEY", "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"), max_age=3600, same_site="lax", https_only=False)
@@ -1024,3 +1007,21 @@ def contas_digitais_admin(request: Request):
         "airtm_account": AIRM_ACCOUNT or "Não configurada",
         "financeiro": financeiro,
     })
+
+    
+@app.get("/sitemap.xml")
+async def get_sitemap():
+    from fastapi.responses import Response  # Importado aqui dentro para evitar erros
+    
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://sitemaps.org" xmlns:xhtml="http://w3.org">
+  <url><loc>https://onrender.com</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>1.0000</priority></url>
+  <url><loc>https://onrender.comcadastro</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comlogin</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/1</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/2</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/3</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/4</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comrecuperar</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.6400</priority></url>
+</urlset>"""
+    return Response(content=xml_content, media_type="application/xml")
