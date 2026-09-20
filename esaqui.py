@@ -25,59 +25,25 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
-from fastapi.responses import Response  # Garanta que este import está no topo do seu arquivo principal
-
+from fastapi.responses import Response
+from esaqui.py import app
+    
 @app.get("/sitemap.xml")
 async def get_sitemap():
-    base_url = "https://esaqui-plataforma.onrender.com" 
+    from fastapi.responses import Response  # Importado aqui dentro para evitar erros
+    
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/css" href="https://www.xml-sitemaps.com/css/sitemap.css"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>1.0000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/cadastro</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/login</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/curso/1</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/curso/2</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/curso/3</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/curso/4</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.8000</priority>
-  </url>
-  <url>
-       <loc>https://esaqui-plataforma.onrender.com/recuperar</loc>
-       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
-       <priority>0.6400</priority>
-  </url>
-</urlset>
-"""
+<urlset xmlns="http://sitemaps.org" xmlns:xhtml="http://w3.org">
+  <url><loc>https://onrender.com</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>1.0000</priority></url>
+  <url><loc>https://onrender.comcadastro</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comlogin</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/1</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/2</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/3</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comcurso/4</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.8000</priority></url>
+  <url><loc>https://onrender.comrecuperar</loc><lastmod>2026-09-20T08:56:24+00:00</lastmod><priority>0.6400</priority></url>
+</urlset>"""
     return Response(content=xml_content, media_type="application/xml")
-
 
 app = FastAPI(title="ESAQUI - Sistema Automatizado")
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("ESAQUI_SECRET_KEY", "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"), max_age=3600, same_site="lax", https_only=False)
