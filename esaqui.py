@@ -25,7 +25,7 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
-from fastapi import Response
+from fastapi.responses import Response  # Garanta que este import está no topo do seu arquivo principal
 
 @app.get("/sitemap.xml")
 async def get_sitemap():
@@ -76,7 +76,8 @@ async def get_sitemap():
   </url>
 </urlset>
 """
-    return Response(content=sitemap_xml, media_type="application/xml")
+    return Response(content=xml_content, media_type="application/xml")
+
 
 app = FastAPI(title="ESAQUI - Sistema Automatizado")
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("ESAQUI_SECRET_KEY", "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"), max_age=3600, same_site="lax", https_only=False)
