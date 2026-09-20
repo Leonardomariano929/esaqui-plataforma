@@ -3,14 +3,32 @@ services:
     name: esaqui-plataforma
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn esaqui:app --host 0.0.0.0 --port $PORT"
+    buildCommand: "python -m pip install --upgrade pip && python -m pip install -r requirements.txt"
+    startCommand: "gunicorn esaqui:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
       - key: ESAQUI_SECRET_KEY
-        value: "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"
+        generateValue: true
       - key: WHATSAPP_NUMBER
-        value: "244923000000"
+        value: "+244000000000"
       - key: WHATSAPP_MESSAGE
-        value: "Olá, gostaria de assistência remota da ESAQUI."
+        value: "Olá, gostaria de assistência da ESAQUI. Configure o número real no painel do Render antes de publicar."
+      - key: BYBIT_ACCOUNT
+        value: "SEU_USUARIO_BYBIT"
+        sync: false
+      - key: AIRM_ACCOUNT
+        value: "SEU_USUARIO_AIRTM"
+        sync: false
+      - key: GOOGLE_AD_REVENUE_PER_VISIT_USD
+        value: "0.0025"
+      - key: GOOGLE_AD_REVENUE_PER_VISIT_EUR
+        value: "0.0022"
+      - key: GOOGLE_AD_REVENUE_PER_ONLINE_USER_USD
+        value: "0.00"
+      - key: GOOGLE_AD_REVENUE_PER_ONLINE_USER_EUR
+        value: "0.00"
+      - key: APP_STORE_URL
+        value: "https://apps.microsoft.com"
+      - key: GOOGLE_PLAY_URL
+        value: "https://play.google.com"

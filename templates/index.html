@@ -9,11 +9,20 @@
     <meta name="apple-mobile-web-app-title" content="ESAQUI">
     <title>ESAQUI | Formação | Tecnologia | Gestão</title>
     <meta name="description" content="ESAQUI - Formação profissional em tecnologia, gestão e negócios.">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="manifest" href="/static/manifest.json">
-    <link rel="apple-touch-icon" href="/static/fotos/padrao.png">
+    <link rel="icon" type="image/png" href="/static/favicon-512.png?v=3" sizes="128x128 256x256 512x512">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=3" sizes="any">
+    <link rel="apple-touch-icon" href="/static/favicon-512.png?v=3" sizes="180x180">
+    <link rel="stylesheet" href="/static/style.css?v=3">
+    <link rel="manifest" href="/static/manifest.json?v=3">
 </head>
 <body>
+    <div id="loading-screen" aria-live="polite" aria-label="aguarde, por favor...">
+        <div class="loading-screen-content">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <h2>aguarde, por favor...</h2>
+        </div>
+    </div>
+
     <header class="topbar">
         <div class="container nav-wrap">
             <a href="/" class="brand">
@@ -54,17 +63,29 @@
                 </div>
 
                 <div class="hero-visual">
-                    <div class="slide-panel">
-                        <div class="slide-badge">Em destaque</div>
-                        <h3>Gestão Comercial Primavera v10</h3>
-                        <p>Faturação, stock, clientes e controle operacional em um ambiente de negócios real.</p>
-                        <div class="slide-meta">
-                            <span>12 módulos</span>
-                            <span>+1.200 alunos</span>
+                    <div class="slide-panel banner-panel" aria-label="Banner institucional da ESAQUI">
+                        <div class="brand-banner-content">
+                            <div class="brand-banner-tag">ESAQUI</div>
+                            <h3>Futuro digital em formação</h3>
+                            <p>Competências em tecnologia, gestão e negócios para transformar sua carreira e seu negócio.</p>
+                            <div class="brand-banner-stats">
+                                <span>+1.200 alunos</span>
+                                <span>90%+ desempenho</span>
+                            </div>
+                        </div>
+                        <div class="brand-banner-visual" aria-hidden="true">
+                            <div class="brand-badge">E</div>
+                            <div class="signal-grid"></div>
                         </div>
                     </div>
-                    <div class="video-card">
-                        <iframe src="https://www.youtube.com/embed/ScMzIvxBSi4?si=0R9q9dXwqUzUEZwC" title="Curso ESAQUI apresentação" allowfullscreen></iframe>
+
+                    <div class="video-card tech-video-card" aria-label="Vídeo tecnológico da ESAQUI">
+                        <div class="tech-video-overlay">
+                            <span class="video-chip">Tecnologia + resultado</span>
+                            <h3>Prática, inovação e formação com propósito.</h3>
+                            <p>Uma experiência digital pensada para acelerar aprendizagem, execução e crescimento profissional.</p>
+                            <button type="button" class="play-button" aria-label="Assistir apresentação da ESAQUI">▶ Assistir apresentação</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,6 +108,97 @@
                 <div class="stat-box">
                     <strong>24/7</strong>
                     <span>Suporte técnico</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section premium-benefits">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="eyebrow">Por que escolher a ESAQUI</span>
+                    <h2>Uma formação pensada para resultados reais.</h2>
+                </div>
+
+                <div class="benefits-grid">
+                    <article class="benefit-card">
+                        <div class="benefit-icon">🎯</div>
+                        <h3>Conteúdo orientado ao mercado</h3>
+                        <p>Metodologias atuais e exercícios aplicados ao contexto real dos negócios, tecnologia e gestão.</p>
+                    </article>
+                    <article class="benefit-card">
+                        <div class="benefit-icon">👩‍🏫</div>
+                        <h3>Acompanhamento humano</h3>
+                        <p>Suporte técnico, orientação e acompanhamento de perto para que cada aluno avance com segurança.</p>
+                    </article>
+                    <article class="benefit-card">
+                        <div class="benefit-icon">📘</div>
+                        <h3>Materiais prontos</h3>
+                        <p>Vídeos, PDFs e recursos estruturados para facilitar o estudo e melhorar a retenção do conhecimento.</p>
+                    </article>
+                    <article class="benefit-card featured-benefit">
+                        <div class="benefit-icon">🚀</div>
+                        <h3>Resultados que transformam</h3>
+                        <p>Mais do que formação, a ESAQUI entrega competências práticas para evoluir e competir no mercado.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section how-it-works">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="eyebrow">Como funciona</span>
+                    <h2>Três passos para evoluir com a ESAQUI.</h2>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <span class="step-number">01</span>
+                        <h3>Escolha o curso</h3>
+                        <p>Selecione a formação ideal para o seu objetivo profissional, carreira ou negócio.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">02</span>
+                        <h3>Aprenda na prática</h3>
+                        <p>Estude com materiais, aulas e acompanhamentos estruturados para absorver conhecimento rápido.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">03</span>
+                        <h3>Transforme resultados</h3>
+                        <p>Use o que aprendeu para crescer profissionalmente, aplicar no seu trabalho e se diferenciar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section trust-section">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="eyebrow">Resultados em foco</span>
+                    <h2>Mais do que cursos: uma experiência de aceleração profissional.</h2>
+                </div>
+
+                <div class="trust-grid">
+                    <article class="trust-card">
+                        <div class="trust-icon">📈</div>
+                        <h3>Mais produtividade</h3>
+                        <p>Estratégias práticas para aplicar no dia a dia e ganhar velocidade em resultados.</p>
+                    </article>
+                    <article class="trust-card">
+                        <div class="trust-icon">🧠</div>
+                        <h3>Aprendizado inteligente</h3>
+                        <p>Conteúdos estruturados para facilitar a retenção e promover avanço contínuo.</p>
+                    </article>
+                    <article class="trust-card">
+                        <div class="trust-icon">🤝</div>
+                        <h3>Suporte humano</h3>
+                        <p>Apoio próximo, respostas rápidas e acompanhamento para manter o aluno em movimento.</p>
+                    </article>
+                    <article class="trust-card">
+                        <div class="trust-icon">🏆</div>
+                        <h3>Reconhecimento real</h3>
+                        <p>Certificação e valor profissional que se traduzem em diferenciação no mercado.</p>
+                    </article>
                 </div>
             </div>
         </section>
@@ -200,6 +312,62 @@
             </div>
         </section>
 
+        <section class="section" id="avaliacoes">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="eyebrow">Feedback dos alunos</span>
+                    <h2>Quem aprende com a ESAQUI recomenda.</h2>
+                </div>
+
+                <div class="reviews-shell">
+                    <div class="reviews-summary">
+                        <div class="rating-badge">4.9/5</div>
+                        <div class="rating-stars" aria-label="Avaliação média 4.9 de 5">★★★★★</div>
+                        <p>Mais de 1.200 alunos já usaram a nossa metodologia para evoluir profissionalmente.</p>
+                    </div>
+
+                    <div class="review-list" id="reviewList">
+                        <article class="review-card">
+                            <div class="review-header">
+                                <strong>Marina C.</strong>
+                                <span>★★★★★</span>
+                            </div>
+                            <p>“O conteúdo foi muito claro e me ajudou a evoluir na gestão comercial. A estrutura do curso é excelente.”</p>
+                        </article>
+                        <article class="review-card">
+                            <div class="review-header">
+                                <strong>João P.</strong>
+                                <span>★★★★★</span>
+                            </div>
+                            <p>“Aprendi práticas reais, o suporte foi rápido e o material ficou muito útil para o meu trabalho.”</p>
+                        </article>
+                        <article class="review-card">
+                            <div class="review-header">
+                                <strong>António M.</strong>
+                                <span>★★★★★</span>
+                            </div>
+                            <p>“A ESAQUI oferece uma formação moderna, bem orientada e muito útil para quem quer crescer no mercado.”</p>
+                        </article>
+                    </div>
+                </div>
+
+                <form id="feedbackForm" class="feedback-form">
+                    <div class="feedback-row">
+                        <input type="text" id="feedbackNome" placeholder="Seu nome" aria-label="Seu nome" required>
+                        <select id="feedbackRating" aria-label="Avaliação" required>
+                            <option value="5">★★★★★ Excelente</option>
+                            <option value="4">★★★★☆ Muito bom</option>
+                            <option value="3">★★★☆☆ Bom</option>
+                            <option value="2">★★☆☆☆ Regular</option>
+                            <option value="1">★☆☆☆☆ Péssimo</option>
+                        </select>
+                    </div>
+                    <textarea id="feedbackMessage" rows="4" placeholder="Escreva a sua avaliação..." aria-label="Sua avaliação" required></textarea>
+                    <button type="submit" class="btn btn-primary">Enviar avaliação</button>
+                </form>
+            </div>
+        </section>
+
         <section class="section assistant-section" id="suporte">
             <div class="container assistant-layout">
                 <div>
@@ -242,6 +410,47 @@
                 </div>
             </div>
         </section>
+
+        <section class="section faq-section">
+            <div class="container faq-shell">
+                <div class="section-heading center">
+                    <span class="eyebrow">Perguntas frequentes</span>
+                    <h2>Informações claras para decidir com confiança.</h2>
+                </div>
+
+                <div class="faq-grid">
+                    <article class="faq-item">
+                        <h3>Como funcionam os cursos?</h3>
+                        <p>Os cursos são entregues em módulos com materiais, aulas e acompanhamento para facilitar o avanço de forma prática.</p>
+                    </article>
+                    <article class="faq-item">
+                        <h3>Posso estudar no meu ritmo?</h3>
+                        <p>Sim. A estrutura é pensada para permitir flexibilidade, com acesso a materiais para estudo em qualquer momento.</p>
+                    </article>
+                    <article class="faq-item">
+                        <h3>Há suporte para dúvidas?</h3>
+                        <p>Sim. A ESAQUI oferece apoio técnico e orientação por WhatsApp, chat e canais de atendimento.</p>
+                    </article>
+                    <article class="faq-item">
+                        <h3>É uma formação adequada para iniciar?</h3>
+                        <p>Sim. A metodologia foi desenhada para atender tanto iniciantes quanto pessoas que querem evoluir em sua carreira.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section cta-section">
+            <div class="container cta-shell">
+                <div>
+                    <span class="eyebrow">Aproveite agora</span>
+                    <h2>Comece a transformar a sua carreira com a ESAQUI.</h2>
+                </div>
+                <div class="cta-actions">
+                    <a href="/cadastro" class="btn btn-primary large">Inscrever-se agora</a>
+                    <a href="/assistencia-whatsapp?mensagem=Olá%2C+gostaria+de+assist%C3%AAncia+da+ESAQUI." class="btn btn-secondary large">Falar com consultor</a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -275,11 +484,11 @@
             </div>
         </div>
         <div class="footer-bottom">
-            © 2026 ESAQUI - Formação | Tecnologia | Gestão.
+            © 2026 ESAQUI • Formação profissional em Tecnologia, Gestão e Negócios • Todos os direitos reservados.
         </div>
     </footer>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=3"></script>
     <script>
         const assistantForm = document.getElementById('assistantForm');
         const assistantInput = document.getElementById('assistantInput');
@@ -304,6 +513,41 @@
                 messageBot.textContent = data.resposta || 'Sem resposta disponível.';
                 chat.appendChild(messageBot);
                 chat.scrollTop = chat.scrollHeight;
+            });
+        }
+
+        const feedbackForm = document.getElementById('feedbackForm');
+        const reviewList = document.getElementById('reviewList');
+        const ratingBadge = document.querySelector('.rating-badge');
+
+        if (feedbackForm && reviewList && ratingBadge) {
+            feedbackForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const nome = document.getElementById('feedbackNome').value.trim() || 'Cliente ESAQUI';
+                const rating = Number(document.getElementById('feedbackRating').value || 5);
+                const message = document.getElementById('feedbackMessage').value.trim();
+                if (!message) return;
+
+                const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                const review = document.createElement('article');
+                review.className = 'review-card';
+                review.innerHTML = `
+                    <div class="review-header">
+                        <strong>${nome}</strong>
+                        <span>${stars}</span>
+                    </div>
+                    <p>“${message}”</p>
+                `;
+                reviewList.prepend(review);
+
+                const ratings = Array.from(reviewList.querySelectorAll('.review-card span')).map(item => {
+                    return item.textContent.length === 5 ? 5 : item.textContent.split('★').length - 1;
+                });
+                const total = ratings.reduce((sum, value) => sum + value, 0) / ratings.length;
+                ratingBadge.textContent = `${total.toFixed(1)}/5`;
+
+                feedbackForm.reset();
             });
         }
     </script>

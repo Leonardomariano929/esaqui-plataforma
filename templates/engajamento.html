@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engajamento | ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="admin-body">
+    <header class="topbar admin-topbar">
+        <div class="container nav-wrap">
+            <a href="/admin" class="brand"><span class="brand-mark">E</span><span>ESAQUI</span></a>
+            <a href="/logout" class="btn btn-ghost">Sair</a>
+        </div>
+    </header>
+    <main class="container section">
+        <div class="section-heading">
+            <span class="eyebrow">Métricas automáticas</span>
+            <h1>Engajamento da plataforma</h1>
+        </div>
+        <section class="stats-grid">
+            <div class="stat-box"><strong>{{ resumo.visitantes }}</strong><span>Visitantes anônimos</span></div>
+            <div class="stat-box"><strong>{{ resumo.visitas }}</strong><span>Visitas registradas</span></div>
+            <div class="stat-box"><strong>{{ (resumo.media_segundos / 60)|round(1) }} min</strong><span>Tempo médio</span></div>
+            <div class="stat-box"><strong>{{ (resumo.total_segundos / 3600)|round(1) }} h</strong><span>Tempo total</span></div>
+        </section>
+        <section class="stats-grid" style="margin-top:16px;">
+            <div class="stat-box"><strong>$ {{ financeiro.receita_usd }}</strong><span>Receita estimada (USD)</span></div>
+            <div class="stat-box"><strong>€ {{ financeiro.receita_eur }}</strong><span>Receita estimada (EUR)</span></div>
+            <div class="stat-box"><strong>{{ financeiro.visitantes_online }}</strong><span>Visitantes ativos</span></div>
+            <div class="stat-box"><strong>{{ financeiro.alunos_online }}</strong><span>Alunos em linha</span></div>
+        </section>
+        <section class="panel-table" style="margin-top:28px; padding:20px;">
+            <h3>Páginas mais visitadas</h3>
+            <table>
+                <thead><tr><th>Rota</th><th>Visitas</th></tr></thead>
+                <tbody>
+                    {% for rota in rotas %}<tr><td>{{ rota.rota }}</td><td>{{ rota.total }}</td></tr>
+                    {% else %}<tr><td colspan="2">Ainda não há visitas registradas.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,1 +1,1 @@
-web: uvicorn esaqui:app --host 0.0.0.0 --port $PORT
+web: gunicorn esaqui:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT

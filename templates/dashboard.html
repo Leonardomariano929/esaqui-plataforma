@@ -22,6 +22,7 @@
                     {% if nota %}
                         {% if nota.resultado == 'Aprovado' %}
                             <strong style="color: #10b981;">Aprovado (Nota: {{ nota.nota }}/20)</strong>
+                            <a href="/certificado/emitir/{{ aluno_id }}" class="btn btn-primary" style="margin-left:10px;">Emitir certificado</a>
                         {% else %}
                             <strong style="color: #ef4444;">Reprovado (Nota: {{ nota.nota }}/20)</strong>
                         {% endif %}
@@ -89,6 +90,6 @@
         <img id="imgZoomed" src="" alt="Zoom da Foto">
     </div>
     
-    <script src="/templates/javascript/modal.js"></script>
+    <script src="/static/javascript/modal.js"></script>
 </body>
 </html>

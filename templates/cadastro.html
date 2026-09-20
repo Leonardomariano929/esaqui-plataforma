@@ -36,7 +36,10 @@
                 </div>
                 <div class="field-group">
                     <label>Senha</label>
-                    <input type="password" name="senha" minlength="8" required>
+                    <div class="password-field">
+                        <input id="cadastro-senha" type="password" name="senha" minlength="8" required>
+                        <button type="button" class="password-toggle" data-target="cadastro-senha" aria-label="Mostrar senha">Mostrar</button>
+                    </div>
                 </div>
 
                 <div class="divider"></div>
@@ -64,5 +67,6 @@
             </div>
         </div>
     </div>
+    <script src="/static/javascript/password_toggle.js"></script>
 </body>
 </html>

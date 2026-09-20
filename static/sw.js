@@ -1,10 +1,10 @@
-const CACHE_NAME = 'esaqui-shell-v1';
+const CACHE_NAME = 'esaqui-shell-v3';
 const APP_SHELL = [
     '/',
-    '/static/style.css',
-    '/static/app.js',
-    '/static/manifest.json',
-    '/static/fotos/padrao.png'
+    '/static/style.css?v=3',
+    '/static/app.js?v=3',
+    '/static/manifest.json?v=3',
+    '/static/fotos/padrao.svg?v=3'
 ];
 
 self.addEventListener('install', function (event) {

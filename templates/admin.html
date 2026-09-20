@@ -14,6 +14,8 @@
                 <span>ESAQUI</span>
             </a>
             <nav class="main-nav">
+                <a href="/admin/contas-digitais" class="btn btn-secondary">Contas digitais</a>
+                <a href="/admin/engajamento" class="btn btn-secondary">Engajamento</a>
                 <a href="/admin/exportar-financeiro" class="btn btn-primary">Exportar Excel</a>
                 <a href="/logout" class="btn btn-ghost">Sair</a>
             </nav>
@@ -66,6 +68,23 @@
             <div class="progress-bar secondary">
                 <div class="progress-fill pending" style="width: {{ pct_pendente }}%;">Pendentes</div>
             </div>
+        </section>
+
+        <section class="admin-panel" style="margin-bottom: 28px;">
+            <div class="panel-head">
+                <h3>WhatsApp do administrador</h3>
+            </div>
+            <form action="/admin/atualizar-whatsapp" method="POST" class="admin-form">
+                <div class="field-group">
+                    <label>Número do WhatsApp</label>
+                    <input type="text" name="numero" value="{{ whatsapp_numero }}" placeholder="+244000000000" required>
+                </div>
+                <div class="field-group">
+                    <label>Mensagem padrão</label>
+                    <textarea name="mensagem" rows="3" required>{{ whatsapp_mensagem }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Guardar WhatsApp</button>
+            </form>
         </section>
 
         <section class="admin-grid">

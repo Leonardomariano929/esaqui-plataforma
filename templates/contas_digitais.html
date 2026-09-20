@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contas Digitais | ESAQUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="admin-body">
+    <header class="topbar admin-topbar">
+        <div class="container nav-wrap">
+            <a href="/admin" class="brand"><span class="brand-mark">E</span><span>ESAQUI</span></a>
+            <a href="/logout" class="btn btn-ghost">Sair</a>
+        </div>
+    </header>
+    <main class="container section">
+        <div class="section-heading">
+            <span class="eyebrow">Acesso restrito</span>
+            <h1>Contas para engajamento digital</h1>
+            <p>Somente identificadores públicos configurados no ambiente de produção são exibidos aqui. Senhas, chaves privadas e seed phrases não devem ser colocadas no sistema.</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card"><h3>Bybit</h3><p>{{ bybit_account }}</p></div>
+            <div class="pricing-card"><h3>Airtm</h3><p>{{ airtm_account }}</p></div>
+        </div>
+        <div class="stats-grid" style="margin-top:18px;">
+            <div class="stat-box"><strong>$ {{ financeiro.receita_usd }}</strong><span>Receita por tráfego / uso</span></div>
+            <div class="stat-box"><strong>€ {{ financeiro.receita_eur }}</strong><span>Receita convertida em EUR</span></div>
+            <div class="stat-box"><strong>{{ financeiro.visitantes_online }}</strong><span>Visitantes ativos</span></div>
+            <div class="stat-box"><strong>{{ financeiro.alunos_online }}</strong><span>Alunos em linha</span></div>
+        </div>
+    </main>
+</body>
+</html>

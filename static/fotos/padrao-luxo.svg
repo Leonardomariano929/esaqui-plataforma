@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ESAQUI app icon premium">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061b43"/>
+      <stop offset="52%" stop-color="#0d3b9a"/>
+      <stop offset="100%" stop-color="#0b2b73"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff0b3"/>
+      <stop offset="38%" stop-color="#f7d870"/>
+      <stop offset="100%" stop-color="#d89f2f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="126" fill="url(#bg)"/>
+  <rect x="34" y="34" width="444" height="444" rx="102" fill="none" stroke="#dfe7f7" stroke-opacity="0.78" stroke-width="8"/>
+
+  <g transform="translate(0 8)">
+    <rect x="124" y="124" width="74" height="260" rx="22" fill="url(#gold)"/>
+    <rect x="185" y="124" width="180" height="62" rx="22" fill="url(#gold)"/>
+    <rect x="185" y="225" width="210" height="62" rx="22" fill="url(#gold)"/>
+    <rect x="185" y="326" width="180" height="62" rx="22" fill="url(#gold)"/>
+  </g>
+
+  <path d="M372 158 L416 158" stroke="#f7d870" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="418" cy="158" r="12" fill="#ffffff" opacity="0.9"/>
+</svg>

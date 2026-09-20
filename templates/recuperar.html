@@ -22,12 +22,16 @@
             </div>
             <div class="form-group">
                 <label>Defina a Nova Palavra-Passe (Mínimo 8 dígitos)</label>
-                <input type="password" name="nova_senha" minlength="8" required style="height:46px;">
+                <div class="password-field" style="position:relative;">
+                    <input id="recuperar-senha" type="password" name="nova_senha" minlength="8" required style="height:46px; padding-right:110px;">
+                    <button type="button" class="password-toggle" data-target="recuperar-senha" aria-label="Mostrar senha" style="position:absolute; right:8px; top:50%; transform:translateY(-50%);">Mostrar</button>
+                </div>
             </div>
             
             <button type="submit" class="btn-submit" style="background:#003366; height:48px;">Redefinir Credenciais Securitárias</button>
             <div class="form-toggle-links" style="margin-top:15px;"><a href="/login">← Voltar para a Tela de Login</a></div>
         </form>
     </div>
+    <script src="/static/javascript/password_toggle.js"></script>
 </body>
 </html>

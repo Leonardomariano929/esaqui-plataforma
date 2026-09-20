@@ -20,7 +20,10 @@
                 </div>
                 <div class="field-group">
                     <label>Senha</label>
-                    <input type="password" name="senha" required>
+                    <div class="password-field">
+                        <input id="login-senha" type="password" name="senha" required>
+                        <button type="button" class="password-toggle" data-target="login-senha" aria-label="Mostrar senha">Mostrar</button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary full-width">Acessar área restrita</button>
             </form>
@@ -34,5 +37,6 @@
             </div>
         </div>
     </div>
+    <script src="/static/javascript/password_toggle.js"></script>
 </body>
 </html>
