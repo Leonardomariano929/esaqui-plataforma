@@ -25,6 +25,58 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
+from fastapi import Response
+
+@app.get("/sitemap.xml")
+async def get_sitemap():
+    base_url = "https://esaqui-plataforma.onrender.com" 
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="https://www.xml-sitemaps.com/css/sitemap.css"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>1.0000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/cadastro</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/login</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/curso/1</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/curso/2</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/curso/3</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/curso/4</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.8000</priority>
+  </url>
+  <url>
+       <loc>https://esaqui-plataforma.onrender.com/recuperar</loc>
+       <lastmod>2026-09-20T08:56:24+00:00</lastmod>
+       <priority>0.6400</priority>
+  </url>
+</urlset>
+"""
+    return Response(content=sitemap_xml, media_type="application/xml")
 
 app = FastAPI(title="ESAQUI - Sistema Automatizado")
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("ESAQUI_SECRET_KEY", "ESAQUI-SECRET-CHANGE-ME-2026-SECURE-KEY"), max_age=3600, same_site="lax", https_only=False)
@@ -32,7 +84,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.environ.get("ESAQUI_SECRET_K
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "+244000000000")
-WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI. Configure o número real em WHATSAPP_NUMBER antes de publicar.")
+WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI.")
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com/esaqui")
 
 
@@ -312,15 +364,15 @@ def init_db():
     for c_id, nome, desc, preco, video, pdf_url, icone, slug in cursos_iniciais:
         cursor.execute("INSERT OR IGNORE INTO cursos (id, nome, descricao, preco, video_apresentacao, pdf_url, icone, slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (c_id, nome, desc, preco, video, pdf_url, icone, slug))
 
-    senha_admin_hash = criptografar_senha("Admin12345")
-    email_admin_criptografado = criptografar_email("admin@esaqui.com")
+    senha_admin_hash = criptografar_senha("senha_admin_hash")
+    email_admin_criptografado = criptografar_email("email_admin_criptografado")
     cursor.execute("""
         INSERT OR IGNORE INTO usuarios (id, nome, email, telefone, senha, pergunta_seguranca, resposta_seguranca, role, foto)
         VALUES (1, 'Admin ESAQUI', ?, '900000000', ?, 'Animal', 'Rex', 'admin', '/static/fotos/padrao.svg')
     """, (email_admin_criptografado, senha_admin_hash))
 
-    senha_prof_hash = criptografar_senha("Prof12345")
-    email_prof_criptografado = criptografar_email("professor@esaqui.com")
+    senha_prof_hash = criptografar_senha("senha_prof_hash")
+    email_prof_criptografado = criptografar_email(" email_prof_criptografado")
     cursor.execute("""
         INSERT OR IGNORE INTO usuarios (id, nome, email, telefone, senha, pergunta_seguranca, resposta_seguranca, role, foto)
         VALUES (2, 'Professor Primavera', ?, '911111111', ?, 'Escola', 'Puniv', 'professor', '/static/fotos/padrao.svg')
