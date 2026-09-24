@@ -230,7 +230,7 @@ def buscar_web_snippets(consulta: str, limite: int = 3):
     termo = (consulta or "").strip()
     if not termo:
         return []
-    url = "https://duckduckgo.com/html/?q=" + quote_plus(termo + " curso formação tecnologia")
+    url = "https://google.com/html/?q=" + quote_plus(termo + " curso formação tecnologia")
     req = UrlRequest(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
         with urlopen(req, timeout=10) as resposta:
@@ -1008,7 +1008,21 @@ def contas_digitais_admin(request: Request):
         "financeiro": financeiro,
     })
 
-    
+
+from fastapi.responses import PlainTextResponse # Verifique se tem este import no topo ou use aqui dentro
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+async def get_robots_txt():
+    # Instruções de SEO para a ESAQUI
+    lines = [
+        "User-agent: *",                 # Aplica-se a todos os motores de busca (Google, Bing, etc.)
+        "Disallow: /admin/",             # Bloqueia o robô de espreitar o painel de administração
+        "Disallow: /contas-digitais/",   # Protege áreas financeiras privadas se houver
+        "Allow: /",                      # Permite ler todo o resto do site (cursos, cadastro, etc.)
+        "Sitemap: https://esaqui-plataforma.onrender.com" # Indica onde está o mapa do site
+    ]
+    return "\n".join(lines)
+
 @app.get("/sitemap.xml")
 async def get_sitemap():
     from fastapi.responses import Response  # Importado aqui dentro para evitar erros
