@@ -36,11 +36,13 @@ WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assist�
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
-    # Puxa o link seguro que configuraremos no painel do Render
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        raise ValueError("A variável DATABASE_URL não foi definida no Render!")
-    return psycopg2.connect(database_url)
+    # Agora lê exatamente a variável em maiúsculas do Render
+    url_do_render = os.environ.get("DATABASE_URL")
+    
+    if not url_do_render:
+        raise ValueError("A variável DATABASE_URL está vazia ou não foi guardada no Render!")
+        
+    return psycopg2.connect(url_do_render)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
