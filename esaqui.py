@@ -42,7 +42,7 @@ def obter_conexao():
     senha_mascarada = base64.b64decode("QWxtZWlkYURvYmFndTIwMjUwNzIw").decode("utf-8")
     
     # URL estruturada usando o Pooler IPv4 estável na porta 6543
-    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{sou_mau}@://supabase.com"
+    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_mascarada}@://supabase.com"
     
     return psycopg2.connect(url_final)
 
