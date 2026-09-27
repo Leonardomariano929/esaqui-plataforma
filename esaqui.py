@@ -35,15 +35,12 @@ WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "+244000000000")
 WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI.")
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
-# Deixe exatamente esta linha. Não mude nada nela e não coloque a sua senha aqui.
-DATABASE_URL = os.environ.get("DATABASE_URL")
+# Pode apagar a linha DATABASE_URL = os.environ.get("DATABASE_URL") se ela ainda estiver aí
 
 def obter_conexao():
-    if not DATABASE_URL:
-        raise ValueError("A variável de ambiente DATABASE_URL não está configurada!")
-    return psycopg2.connect(DATABASE_URL)
-
-# def obter_conexao(): return psycopg2.connect(DATABASE_URL)
+    # O psycopg2 recolhe automaticamente as variáveis PGHOST, PGUSER, PGPASSWORD, etc.
+    # que configuramos no painel do Render. É a forma mais segura do mundo!
+    return psycopg2.connect()
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
