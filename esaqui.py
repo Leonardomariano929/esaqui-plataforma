@@ -35,11 +35,19 @@ WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "+244000000000")
 WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI.")
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
-# Ligação centralizada com o PostgreSQL do Supabase
-DATABASE_URL = os.environ.get("DATABASE_URL", "SUA_URI_DO_SUPABASE_AQUI")
+# Deixe exatamente esta linha. Não mude nada nela e não coloque a sua senha aqui.
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def obter_conexao():
+    if not DATABASE_URL:
+        raise ValueError("A variável de ambiente DATABASE_URL não está configurada!")
     return psycopg2.connect(DATABASE_URL)
+
+# def obter_conexao(): return psycopg2.connect(DATABASE_URL)
+
+def carregar_configuracao(chave: str, padrao: str = "") -> str:
+    conn = obter_conexao()
+# ... o resto do código continua igual ..
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
