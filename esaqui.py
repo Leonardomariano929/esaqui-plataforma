@@ -36,8 +36,8 @@ WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assist�
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
-    # Cole a sua nova senha no lugar indicado abaixo
-    url_direta = "postgresql://postgres.brrxykljoruybwfkuryo:SUA_NOVA_SENHA_AQUI@://supabase.com"
+    # A URL fica completamente gravada aqui dentro da função
+    url_direta = "postgresql://postgres.brrxykljoruybwfkuryo:MUDE_AQUI_PELA_SUA_SENHA_NOVA@://supabase.com"
     
     return psycopg2.connect(url_direta)
 
