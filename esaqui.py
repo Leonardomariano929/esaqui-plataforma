@@ -36,13 +36,16 @@ WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assist�
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
-    # Agora lê exatamente a variável em maiúsculas do Render
-    url_do_render = os.environ.get("DATABASE_URL")
+    # Puxa apenas a senha isolada que está escondida no painel do Render
+    senha_secreta = os.environ.get("PGPASSWORD")
     
-    if not url_do_render:
-        raise ValueError("A variável DATABASE_URL está vazia ou não foi guardada no Render!")
+    if not senha_secreta:
+        raise ValueError("A variável de ambiente PGPASSWORD está em falta no Render!")
         
-    return psycopg2.connect(url_do_render)
+    # O Python monta o link em memória usando o Pooler IPv4 estável na porta 6543
+    url_ipv4 = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_secreta}@://supabase.com"
+    
+    return psycopg2.connect(url_ipv4)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
