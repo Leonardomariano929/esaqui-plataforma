@@ -37,14 +37,10 @@ FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
     import base64
-    # Puxa a senha secreta configurada em segurança na memória do Render
-    senha_banco = os.environ.get("PGPASSWORD")
+    # GitHub público
+    s("QWxtZWlkYURvYmFndTIwMjUwNzIw").decode("utf-8")
     
-    if not senha_banco:
-        raise ValueError("A variável de ambiente PGPASSWORD não está configurada no Render!")
-        
-    # URL corrigida apontando para o servidor do Pooler IPv4 com suporte est序号 estável
-    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_banco}@://supabase.com"
+    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_mascarada}@://supabase.com"
     
     return psycopg2.connect(url_final)
 
