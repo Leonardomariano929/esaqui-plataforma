@@ -34,17 +34,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "+244000000000")
 WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI.")
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
-# Lê a URL estruturada que vamos montar diretamente no Render
-DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def obter_conexao():
-    if not DATABASE_URL:
-        raise ValueError("A variável de ambiente DATABASE_URL não está configurada no Render!")
-    return psycopg2.connect(DATABASE_URL)
-
-def carregar_configuracao(chave: str, padrao: str = "") -> str:
-    conn = obter_conexao()
-# ... o resto do código continua igual ..
+    # Puxa a senha isolada que você configurou no Render
+    senha_banco = os.environ.get("PGPASSWORD")
+    
+    if not senha_banco:
+        raise ValueError("A variável PGPASSWORD não está configurada no Render!")
+        
+    # O próprio Python monta a URL injetando a sua senha com segurança
+    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_banco}@://supabase.com"
+    
+    return psycopg2.connect(url_final)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
