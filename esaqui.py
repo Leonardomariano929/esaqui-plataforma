@@ -36,16 +36,10 @@ WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assist�
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
-    # Puxa a senha isolada que você configurou no Render
-    senha_banco = os.environ.get("PGPASSWORD")
+    # Cole a sua nova senha no lugar indicado abaixo
+    url_direta = "postgresql://postgres.brrxykljoruybwfkuryo:SUA_NOVA_SENHA_AQUI@://supabase.com"
     
-    if not senha_banco:
-        raise ValueError("A variável PGPASSWORD não está configurada no Render!")
-        
-    # O próprio Python monta a URL injetando a sua senha com segurança
-    url_final = f"postgresql://postgres.brrxykljoruybwfkuryo:{senha_banco}@://supabase.com"
-    
-    return psycopg2.connect(url_final)
+    return psycopg2.connect(url_direta)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
