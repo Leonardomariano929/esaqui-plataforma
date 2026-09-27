@@ -3,14 +3,15 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSON
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 import shutil
 import base64
 import hashlib
 import uuid
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 import openpyxl
 import bcrypt
 from cryptography.fernet import Fernet
@@ -19,7 +20,6 @@ from urllib.parse import quote_plus
 import re
 import html as html_lib
 import zipfile
-from datetime import datetime, timedelta
 
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -33,31 +33,43 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "+244000000000")
 WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assistência da ESAQUI.")
-FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com/esaqui")
+FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
+# Ligação centralizada com o PostgreSQL do Supabase
+DATABASE_URL = os.environ.get("DATABASE_URL", "SUA_URI_DO_SUPABASE_AQUI")
+
+def obter_conexao():
+    return psycopg2.connect(DATABASE_URL)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    valor = conn.execute("SELECT valor FROM configuracoes WHERE chave = ?", (chave,)).fetchone()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT valor FROM configuracoes WHERE chave = %s", (chave,))
+    valor = cursor.fetchone()
+    cursor.close()
     conn.close()
     if valor and valor["valor"]:
         return valor["valor"]
     return padrao
 
-
 def guardar_configuracao(chave: str, valor: str):
-    conn = sqlite3.connect("esaqui.db")
-    conn.execute(
-        "INSERT INTO configuracoes (chave, valor) VALUES (?, ?) ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor",
+    conn = obter_conexao()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO configuracoes (chave, valor) VALUES (%s, %s)
+        ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor
+        """,
         (chave, (valor or "").strip()),
     )
     conn.commit()
+    cursor.close()
     conn.close()
-INSTAGRAM_URL = os.environ.get("INSTAGRAM_URL", "https://instagram.com/esaqui")
-TIKTOK_URL = os.environ.get("TIKTOK_URL", "https://www.tiktok.com/@esaqui")
-APP_STORE_URL = os.environ.get("APP_STORE_URL", "https://apps.microsoft.com")
-GOOGLE_PLAY_URL = os.environ.get("GOOGLE_PLAY_URL", "https://play.google.com")
+
+INSTAGRAM_URL = os.environ.get("INSTAGRAM_URL", "https://instagram.com")
+TIKTOK_URL = os.environ.get("TIKTOK_URL", "https://tiktok.com")
+APP_STORE_URL = os.environ.get("APP_STORE_URL", "https://microsoft.com")
+GOOGLE_PLAY_URL = os.environ.get("GOOGLE_PLAY_URL", "https://google.com")
 BYBIT_ACCOUNT = os.environ.get("BYBIT_ACCOUNT", "SEU_USUARIO_BYBIT")
 AIRM_ACCOUNT = os.environ.get("AIRM_ACCOUNT", "SEU_USUARIO_AIRTM")
 GOOGLE_AD_REVENUE_PER_VISIT_USD = float(os.environ.get("GOOGLE_AD_REVENUE_PER_VISIT_USD", "0.0025"))
@@ -126,9 +138,12 @@ def buscar_usuario_por_email(conn, email: str):
     email = normalizar_email(email)
     if not email:
         return None
-    cursor = conn.cursor()
-    conn.row_factory = sqlite3.Row
-    for row in cursor.execute("SELECT * FROM usuarios").fetchall():
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM usuarios")
+    rows = cursor.fetchall()
+    cursor.close()
+
+    for row in rows:
         stored_email = row["email"]
         if stored_email == email:
             return row
@@ -136,9 +151,49 @@ def buscar_usuario_por_email(conn, email: str):
             return row
     return None
 
-
 def usuario_logado(request: Request):
     return request.session.get("usuario")
+
+def calcular_resumo_financeiro() -> dict:
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("SELECT COUNT(*) AS total, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM visitas")
+    visitas_total = cursor.fetchone()
+
+    tempo_limite = (datetime.now() - timedelta(minutes=15)).isoformat(timespec="seconds")
+    cursor.execute("SELECT COUNT(DISTINCT visitante_hash) AS total FROM visitas WHERE ultimo_sinal >= %s", (tempo_limite,))
+    visitantes_online = cursor.fetchone()
+
+    cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE role = 'aluno'")
+    alunos_online = cursor.fetchone()
+
+    valor_visita_usd = float(os.environ.get("GOOGLE_AD_REVENUE_PER_VISIT_USD", "0.0025"))
+    valor_visita_eur = float(os.environ.get("GOOGLE_AD_REVENUE_PER_VISIT_EUR", "0.0022"))
+    valor_aluno_online_usd = float(os.environ.get("GOOGLE_AD_REVENUE_PER_ONLINE_USER_USD", "0.08"))
+    valor_aluno_online_eur = float(os.environ.get("GOOGLE_AD_REVENUE_PER_ONLINE_USER_EUR", "0.07"))
+
+    visitas = int(visitas_total["total"] or 0)
+    aluno_ativos = int(visitantes_online["total"] or 0)
+    receita_usd = (visitas * valor_visita_usd) + (aluno_ativos * valor_aluno_online_usd)
+    receita_eur = (visitas * valor_visita_eur) + (aluno_ativos * valor_aluno_online_eur)
+
+    cursor.close()
+    conn.close()
+    
+    return {
+        "visitas": visitas,
+        "visitantes_online": aluno_ativos,
+        "alunos_online": int(alunos_online["total"] or 0),
+        "tempo_total_segundos": int(visitas_total["segundos"] or 0),
+        "receita_usd": round(receita_usd, 2),
+        "receita_eur": round(receita_eur, 2),
+        "valor_visita_usd": valor_visita_usd,
+        "valor_visita_eur": valor_visita_eur,
+        "valor_aluno_online_usd": valor_aluno_online_usd,
+        "valor_aluno_online_eur": valor_aluno_online_eur,
+    }
+
 
 
 def exigir_login(request: Request, roles=None):
@@ -155,29 +210,39 @@ def hash_visitante(identificador: str) -> str:
 
 
 def calcular_resumo_financeiro() -> dict:
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    visitas_total = cursor.execute("SELECT COUNT(*) AS total, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM visitas").fetchone()
-    visitantes_online = cursor.execute(
-        "SELECT COUNT(DISTINCT visitante_hash) AS total FROM visitas WHERE ultimo_sinal >= ?",
-        ((datetime.now() - timedelta(minutes=15)).isoformat(timespec="seconds"),),
-    ).fetchone()
-    alunos_online = cursor.execute(
-        "SELECT COUNT(*) AS total FROM usuarios WHERE role = 'aluno'"
-    ).fetchone()
+# 1. Abre a ligação com o Supabase e usa o RealDictCursor para manter compatibilidade com chaves ["total"]
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # 2. Calcula o total de visitas e segundos
+    cursor.execute("SELECT COUNT(*) AS total, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM visitas")
+    visitas_total = cursor.fetchone()
+    
+    # 3. Calcula os visitantes online nos últimos 15 minutos (Substituído ? por %s)
+    tempo_limite = (datetime.now() - timedelta(minutes=15)).isoformat(timespec="seconds")
+    cursor.execute("SELECT COUNT(DISTINCT visitante_hash) AS total FROM visitas WHERE ultimo_sinal >= %s", (tempo_limite,))
+    visitantes_online = cursor.fetchone()
+    
+    # 4. Calcula os alunos online
+    cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE role = 'aluno'")
+    alunos_online = cursor.fetchone()
 
+    # Valores das variáveis de ambiente (mantém-se igual)
     valor_visita_usd = float(os.environ.get("GOOGLE_AD_REVENUE_PER_VISIT_USD", "0.0025"))
     valor_visita_eur = float(os.environ.get("GOOGLE_AD_REVENUE_PER_VISIT_EUR", "0.0022"))
     valor_aluno_online_usd = float(os.environ.get("GOOGLE_AD_REVENUE_PER_ONLINE_USER_USD", "0.08"))
     valor_aluno_online_eur = float(os.environ.get("GOOGLE_AD_REVENUE_PER_ONLINE_USER_EUR", "0.07"))
 
+    # Processamento dos resultados coletados do Supabase
     visitas = int(visitas_total["total"] or 0)
     aluno_ativos = int(visitantes_online["total"] or 0)
     receita_usd = (visitas * valor_visita_usd) + (aluno_ativos * valor_aluno_online_usd)
     receita_eur = (visitas * valor_visita_eur) + (aluno_ativos * valor_aluno_online_eur)
 
+    # 5. Fecha o cursor e a ligação de forma segura
+    cursor.close()
     conn.close()
+    
     return {
         "visitas": visitas,
         "visitantes_online": aluno_ativos,
@@ -203,14 +268,24 @@ async def registrar_visita(request: Request, call_next):
             visitante = secrets.token_hex(16)
             request.session["visitante_id"] = visitante
         agora = datetime.now().isoformat(timespec="seconds")
-        conn = sqlite3.connect("esaqui.db")
-        conn.execute(
-            "INSERT INTO visitas (visitante_hash, rota, inicio, ultimo_sinal, duracao_segundos) VALUES (?, ?, ?, ?, 0)",
-            (hash_visitante(visitante), rota, inicio.isoformat(timespec="seconds"), agora),
-        )
-        conn.commit()
-        conn.close()
+
+        try:
+            conn = obter_conexao()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO visitas (visitante_hash, duracao_segundos, ultimo_sinal) 
+                VALUES (%s, %s, %s)
+                """,
+                (hash_visitante(visitante), 0, agora)
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print(f"Erro ao registrar visita: {e}")
     return response
+
 
 
 def salvar_upload(upload: UploadFile, diretorio: str, extensoes_permitidas: set[str]) -> str | None:
@@ -328,7 +403,112 @@ def init_db():
     conn.commit()
     conn.close()
 
+def criar_tabelas_supabase():
+    conn = obter_conexao()
+    cursor = conn.cursor()
+    
+    # Cria tabela de configurações
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS configuracoes (
+        chave TEXT PRIMARY KEY,
+        valor TEXT
+    )
+    """)
+    
+    # Cria tabela de usuários (SERIAL no PostgreSQL equivale ao AUTOINCREMENT do SQLite)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE,
+        senha TEXT,
+        role TEXT
+    )
+    """)
+    
+    # Cria tabela de visitas
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS visitas (
+        id SERIAL PRIMARY KEY,
+        visitante_hash TEXT,
+        duracao_segundos INTEGER,
+        ultimo_sinal TEXT
+    )
+    """)
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Executa a criação no início do app
+criar_tabelas_supabase()
+
+# ... funções de criptografia ...
+
+def verificar_senha(senha_pura: str, senha_criptografada: str) -> bool:
+    try:
+        return bcrypt.checkpw(senha_pura.encode('utf-8'), senha_criptografada.encode('utf-8'))
+    except Exception:
+        return False
+
+# A NOVA FUNÇÃO:
+def init_db():
+    conn = obter_conexao()
+    cursor = conn.cursor()
+    
+    cursor.execute("CREATE TABLE IF NOT EXISTS configuracoes (chave TEXT PRIMARY KEY, valor TEXT)")
+    
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        nome TEXT,
+        email TEXT UNIQUE,
+        telefone TEXT,
+        senha TEXT,
+        role TEXT DEFAULT 'aluno',
+        pergunta_seguranca TEXT,
+        resposta_seguranca TEXT
+    )
+    """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS cursos (
+        id SERIAL PRIMARY KEY,
+        nome TEXT,
+        pdf_url TEXT,
+        video_apresentacao TEXT
+    )
+    """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS matriculas (
+        id SERIAL PRIMARY KEY,
+        aluno_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+        curso_id INTEGER REFERENCES cursos(id) ON DELETE CASCADE,
+        status_pagamento TEXT DEFAULT 'Não Enviado'
+    )
+    """)
+    
+    cursor.execute("CREATE TABLE IF NOT EXISTS visitas (id SERIAL PRIMARY KEY, visitante_hash TEXT, duracao_segundos INTEGER, ultimo_sinal TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS notas (id SERIAL PRIMARY KEY, aluno_id INTEGER, nota REAL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS aulas (id SERIAL PRIMARY KEY, curso_id INTEGER, titulo TEXT, conteudo TEXT)")
+    
+    cursor.execute("SELECT COUNT(*) FROM usuarios")
+    if cursor.fetchone()[0] == 0: # Ajuste sutil para ler tupla do Postgres
+        email_admin = criptografar_email("admin@esaqui.com")
+        senha_admin = criptografar_senha("MudeEstaSenha123")
+        cursor.execute(
+            "INSERT INTO usuarios (nome, email, senha, role) VALUES (%s, %s, %s, %s)",
+            ("Administrador", email_admin, senha_admin, "admin")
+        )
+        
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Executa para garantir que as tabelas existem no Supabase ao iniciar
 init_db()
+
 
 @app.post("/assistente-bot")
 def responder_bot(mensagem: str = Form(...)):
@@ -353,18 +533,22 @@ def responder_bot(mensagem: str = Form(...)):
 
 @app.get("/", response_class=HTMLResponse)
 def pagina_inicial(request: Request):
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursos = conn.cursor().execute("SELECT * FROM cursos ORDER BY id").fetchall()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM cursos ORDER BY id")
+    cursos = cursor.fetchall()
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "index.html", context={"cursos": cursos})
 
 
 @app.get("/curso/{curso_id}", response_class=HTMLResponse)
 def curso_detalhe(request: Request, curso_id: int):
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    curso = conn.cursor().execute("SELECT * FROM cursos WHERE id = ?", (curso_id,)).fetchone()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM cursos WHERE id = %s", (curso_id,))
+    curso = cursor.fetchone()
+    cursor.close()
     conn.close()
     if not curso:
         return RedirectResponse(url="/", status_code=302)
@@ -373,27 +557,13 @@ def curso_detalhe(request: Request, curso_id: int):
 
 @app.get("/cadastro", response_class=HTMLResponse)
 def tela_cadastro(request: Request):
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursos = conn.cursor().execute("SELECT * FROM cursos").fetchall()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM cursos")
+    cursos = cursor.fetchall()
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "cadastro.html", context={"erro": None, "cursos": cursos})
-
-
-@app.get("/baixar-app")
-def pagina_baixar_app(request: Request):
-    package_path = os.path.join(BASE_DIR, "static", "ESAQUI-App.apk")
-    os.makedirs(os.path.dirname(package_path), exist_ok=True)
-    if not os.path.exists(package_path):
-        with zipfile.ZipFile(package_path, "w", compression=zipfile.ZIP_DEFLATED) as apk:
-            apk.writestr("manifest.json", '{"name": "ESAQUI App", "version": "1.0.0", "type": "release"}')
-            apk.writestr("README.txt", "ESAQUI - pacote de distribuição para download oficial\nAcesso: https://esaqui-plataforma.onrender.com/login\n")
-    return FileResponse(
-        package_path,
-        filename="ESAQUI-App.apk",
-        media_type="application/vnd.android.package-archive",
-        headers={"Content-Disposition": "attachment; filename=ESAQUI-App.apk"},
-    )
 
 
 @app.post("/cadastro")
@@ -408,38 +578,35 @@ def processar_cadastro(request: Request, nome: str = Form(...), email: str = For
     senha_segura = criptografar_senha(senha)
     email_criptografado = criptografar_email(email)
     try:
-        conn = sqlite3.connect("esaqui.db")
-        conn.row_factory = sqlite3.Row
+        conn = obter_conexao()
         if buscar_usuario_por_email(conn, email):
             conn.close()
             return templates.TemplateResponse(request, "cadastro.html", context={"erro": "E-mail já cadastrado!", "cursos": []})
+        
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO usuarios (nome, email, telefone, senha, pergunta_seguranca, resposta_seguranca) VALUES (?, ?, ?, ?, ?, ?)", (nome.strip(), email_criptografado, telefone, senha_segura, pergunta.strip(), resposta.lower().strip()))
-        aluno_id = cursor.lastrowid
-        cursor.execute("INSERT INTO matriculas (aluno_id, curso_id) VALUES (?, ?)", (aluno_id, curso_id))
+        # No PostgreSQL usamos RETURNING id para pegar o ID gerado pelo SERIAL
+        cursor.execute(
+            """
+            INSERT INTO usuarios (nome, email, telefone, senha, pergunta_seguranca, resposta_seguranca, role) 
+            VALUES (%s, %s, %s, %s, %s, %s, 'aluno') RETURNING id
+            """, 
+            (nome.strip(), email_criptografado, telefone, senha_segura, pergunta.strip(), resposta.lower().strip())
+        )
+        aluno_id = cursor.fetchone()[0]
+        
+        cursor.execute("INSERT INTO matriculas (aluno_id, curso_id) VALUES (%s, %s)", (aluno_id, curso_id))
         conn.commit()
+        cursor.close()
         conn.close()
         return RedirectResponse(url="/login", status_code=302)
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         return templates.TemplateResponse(request, "cadastro.html", context={"erro": "E-mail já cadastrado!", "cursos": []})
-
-
-@app.get("/login", response_class=HTMLResponse)
-def tela_login(request: Request):
-    return templates.TemplateResponse(request, "login.html", context={"erro": None})
-
-
-@app.get("/logout")
-def logout(request: Request):
-    request.session.clear()
-    return RedirectResponse(url="/login", status_code=302)
 
 
 @app.post("/login")
 def processar_login(request: Request, email: str = Form(...), senha: str = Form(...)):
     email = normalizar_email(email)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
+    conn = obter_conexao()
     usuario = buscar_usuario_por_email(conn, email)
     conn.close()
     if usuario and verificar_senha(senha, usuario["senha"]):
@@ -460,15 +627,30 @@ def area_aluno(request: Request, aluno_id: int):
     if usuario["id"] != aluno_id:
         return RedirectResponse(url=f"/dashboard?aluno_id={usuario['id']}", status_code=302)
 
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    dados = cursor.execute("SELECT c.id as curso_id, c.nome as curso_nome, c.pdf_url as pdf_url, c.video_apresentacao, m.status_pagamento FROM matriculas m JOIN cursos c ON m.curso_id = c.id WHERE m.aluno_id = ?", (aluno_id,)).fetchone()
-    nota_aluno = cursor.execute("SELECT * FROM notas WHERE aluno_id = ?", (aluno_id,)).fetchone()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cursor.execute(
+        """
+        SELECT c.id as curso_id, c.nome as curso_nome, c.pdf_url as pdf_url, c.video_apresentacao, m.status_pagamento 
+        FROM matriculas m 
+        JOIN cursos c ON m.curso_id = c.id 
+        WHERE m.aluno_id = %s
+        """, 
+        (aluno_id,)
+    )
+    dados = cursor.fetchone()
+    
+    cursor.execute("SELECT * FROM notas WHERE aluno_id = %s", (aluno_id,))
+    nota_aluno = cursor.fetchone()
+    
     status_pago = dados["status_pagamento"] if dados else "Não Enviado"
     aulas_cadastradas = []
     if status_pago != "Não Enviado" and dados:
-        aulas_cadastradas = cursor.execute("SELECT * FROM aulas WHERE curso_id = ?", (dados["curso_id"],)).fetchall()
+        cursor.execute("SELECT * FROM aulas WHERE curso_id = %s", (dados["curso_id"],))
+        aulas_cadastradas = cursor.fetchall()
+        
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "dashboard.html", context={
         "aluno_id": aluno_id,
@@ -479,6 +661,10 @@ def area_aluno(request: Request, aluno_id: int):
         "curso_pdf": dados["pdf_url"] if dados else None,
         "curso_video": dados["video_apresentacao"] if dados else None,
     })
+
+@app.get("/recuperar", response_class=HTMLResponse)
+def tela_recuperar(request: Request):
+    return templates.TemplateResponse(request, "recuperar.html", context={"erro": None, "sucesso": None})
 
 
 @app.get("/recuperar", response_class=HTMLResponse)
@@ -491,23 +677,25 @@ def processar_recuperar(request: Request, identificador: str = Form(...), respos
     if len(nova_senha) < 8:
         return templates.TemplateResponse(request, "recuperar.html", context={"erro": "A nova senha precisa de 8 ou mais caracteres!", "sucesso": None})
 
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     identificador = identificador.strip()
     usuario = None
     if "@" in identificador:
         usuario = buscar_usuario_por_email(conn, identificador)
     if not usuario:
-        usuario = cursor.execute("SELECT * FROM usuarios WHERE telefone = ?", (identificador,)).fetchone()
+        cursor.execute("SELECT * FROM usuarios WHERE telefone = %s", (identificador,))
+        usuario = cursor.fetchone()
 
     if usuario and usuario["resposta_seguranca"] == resposta.lower().strip():
         nova_senha_hash = criptografar_senha(nova_senha)
-        cursor.execute("UPDATE usuarios SET senha = ? WHERE id = ?", (nova_senha_hash, usuario["id"]))
+        cursor.execute("UPDATE usuarios SET senha = %s WHERE id = %s", (nova_senha_hash, usuario["id"]))
         conn.commit()
+        cursor.close()
         conn.close()
         return templates.TemplateResponse(request, "recuperar.html", context={"erro": None, "sucesso": "Sua palavra-passe foi atualizada com sucesso!"})
 
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "recuperar.html", context={"erro": "Identificador (E-mail/Telefone) ou resposta secreta incorretos!", "sucesso": None})
 
@@ -518,33 +706,41 @@ def painel_admin(request: Request):
     if not usuario:
         return RedirectResponse(url="/login", status_code=302)
 
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     whatsapp_numero = carregar_configuracao("whatsapp_numero", WHATSAPP_NUMBER)
     whatsapp_mensagem = carregar_configuracao("whatsapp_mensagem", WHATSAPP_MESSAGE)
 
-    alunos = cursor.execute("""
+    cursor.execute("""
         SELECT u.id, u.nome, u.telefone, c.nome as curso_nome, m.comprovativo, m.status_pagamento
         FROM usuarios u
         JOIN matriculas m ON u.id = m.aluno_id
         JOIN cursos c ON m.curso_id = c.id
         WHERE u.role = 'aluno'
-    """).fetchall()
-    todos_cursos = cursor.execute("SELECT * FROM cursos ORDER BY id").fetchall()
+    """)
+    alunos = cursor.fetchall()
+    
+    cursor.execute("SELECT * FROM cursos ORDER BY id")
+    todos_cursos = cursor.fetchall()
 
-    faturado = cursor.execute(
-        "SELECT SUM(c.preco) FROM matriculas m JOIN cursos c ON m.curso_id = c.id WHERE m.status_pagamento = 'Aprovado'"
-    ).fetchone()[0] or 0.0
-    pendente = cursor.execute(
-        "SELECT SUM(c.preco) FROM matriculas m JOIN cursos c ON m.curso_id = c.id WHERE m.status_pagamento = 'Pendente'"
-    ).fetchone()[0] or 0.0
+    cursor.execute(
+        "SELECT SUM(c.preco) as total FROM matriculas m JOIN cursos c ON m.curso_id = c.id WHERE m.status_pagamento = 'Aprovado'"
+    )
+    res_faturado = cursor.fetchone()
+    faturado = float(res_faturado["total"]) if res_faturado and res_faturado["total"] else 0.0
+
+    cursor.execute(
+        "SELECT SUM(c.preco) as total FROM matriculas m JOIN cursos c ON m.curso_id = c.id WHERE m.status_pagamento = 'Pendente'"
+    )
+    res_pendente = cursor.fetchone()
+    pendente = float(res_pendente["total"]) if res_pendente and res_pendente["total"] else 0.0
 
     total_geral = faturado + pendente
     pct_faturado = (faturado / total_geral * 100) if total_geral > 0 else 0
     pct_pendente = (pendente / total_geral * 100) if total_geral > 0 else 0
 
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "admin.html", context={
         "alunos": alunos,
@@ -563,9 +759,11 @@ def decidir_pagamento(request: Request, aluno_id: int, acao: str):
     if not exigir_login(request, {"admin"}):
         return RedirectResponse(url="/login", status_code=302)
     novo_status = "Aprovado" if acao == "aprovar" else "Rejeitado"
-    conn = sqlite3.connect("esaqui.db")
-    conn.cursor().execute("UPDATE matriculas SET status_pagamento = ? WHERE aluno_id = ?", (novo_status, aluno_id))
+    conn = obter_conexao()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE matriculas SET status_pagamento = %s WHERE aluno_id = %s", (novo_status, aluno_id))
     conn.commit()
+    cursor.close()
     conn.close()
     return RedirectResponse(url="/admin", status_code=302)
 
@@ -574,10 +772,16 @@ def decidir_pagamento(request: Request, aluno_id: int, acao: str):
 def carregar_chat_admin(request: Request, aluno_id: int):
     if not exigir_login(request, {"admin"}):
         return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    aluno = conn.cursor().execute("SELECT nome FROM usuarios WHERE id = ?", (aluno_id,)).fetchone()
-    historico = conn.cursor().execute("SELECT * FROM mensagens_chat WHERE aluno_id = ? ORDER BY id ASC", (aluno_id,)).fetchall()
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cursor.execute("SELECT nome FROM usuarios WHERE id = %s", (aluno_id,))
+    aluno = cursor.fetchone()
+    
+    cursor.execute("SELECT * FROM mensagens_chat WHERE aluno_id = %s ORDER BY id ASC", (aluno_id,))
+    historico = cursor.fetchall()
+    
+    cursor.close()
     conn.close()
     return templates.TemplateResponse(request, "chat_admin.html", context={"aluno_id": aluno_id, "aluno_nome": aluno["nome"], "historico": historico})
 
@@ -587,20 +791,22 @@ def admin_enviar_mensagem(request: Request, aluno_id: int, conteudo: str = Form(
     if not exigir_login(request, {"admin"}):
         return RedirectResponse(url="/login", status_code=302)
     if conteudo.strip():
-        conn = sqlite3.connect("esaqui.db")
-        conn.cursor().execute(
-            "INSERT INTO mensagens_chat (aluno_id, remetente, conteudo, data_envio) VALUES (?, 'admin', ?, ?)",
+        conn = obter_conexao()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO mensagens_chat (aluno_id, remetente, conteudo, data_envio) VALUES (%s, 'admin', %s, %s)",
             (aluno_id, conteudo.strip(), datetime.now().strftime("%H:%M")),
         )
         conn.commit()
+        cursor.close()
         conn.close()
     return RedirectResponse(url=f"/chat-admin?aluno_id={aluno_id}", status_code=302)
 
 
 @app.get("/assistencia-whatsapp")
-def suporte_whatsapp(request: Request, numero: str = None, mensagem: str = None):
+def suporte_whatsapp(request: Request, numero: str = None, message: str = None):
     telefone = (numero or request.query_params.get("numero") or carregar_configuracao("whatsapp_numero", WHATSAPP_NUMBER)).strip()
-    texto = (mensagem or request.query_params.get("mensagem") or carregar_configuracao("whatsapp_mensagem", WHATSAPP_MESSAGE)).strip()
+    texto = (message or request.query_params.get("mensagem") or carregar_configuracao("whatsapp_mensagem", WHATSAPP_MESSAGE)).strip()
     return RedirectResponse(url=f"https://wa.me/{telefone}?text={quote_plus(texto)}", status_code=302)
 
 
@@ -621,12 +827,16 @@ def exportar_excel_caixa(request: Request):
     ws = wb.active
     ws.title = "Caixa"
     ws.append(["ID", "Nome", "Contacto", "Curso", "Preço", "Estado"])
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    registos = conn.cursor().execute(
+    
+    conn = obter_conexao()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute(
         "SELECT m.id, u.nome, u.telefone, c.nome as curso_nome, c.preco, m.status_pagamento FROM matriculas m JOIN usuarios u ON m.aluno_id = u.id JOIN cursos c ON m.curso_id = c.id"
-    ).fetchall()
+    )
+    registos = cursor.fetchall()
+    cursor.close()
     conn.close()
+    
     for r in registos:
         ws.append([r["id"], r["nome"], r["telefone"], r["curso_nome"], r["preco"], r["status_pagamento"]])
     excel_filename = "Relatorio_Financeiro_ESAQUI.xlsx"
@@ -644,372 +854,16 @@ async def criar_curso(request: Request, nome: str = Form(...), descricao: str = 
     if nome_pdf:
         pdf_url = f"/pdfs/{nome_pdf}"
 
-    conn = sqlite3.connect("esaqui.db")
-    conn.cursor().execute(
-        "INSERT INTO cursos (nome, descricao, preco, video_apresentacao, pdf_url, icone, slug) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    conn = obter_conexao()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO cursos (nome, descricao, preco, video_apresentacao, pdf_url, icone, slug) VALUES (%s, %s, %s, %s, %s, %s, %s)",
         (nome.strip(), descricao.strip(), preco, video_apresentacao.strip() or None, pdf_url or None, icone.strip() or "🎓", nome.strip().lower().replace(" ", "-"))
     )
     conn.commit()
+    cursor.close()
     conn.close()
     return RedirectResponse(url="/admin", status_code=302)
-
-
-@app.post("/admin/upload-video")
-async def admin_upload_video(
-    request: Request,
-    curso_id: int = Form(...),
-    modulo: str = Form(...),
-    titulo: str = Form(...),
-    video_file: UploadFile = File(...),
-):
-    if not exigir_login(request, {"admin"}):
-        return RedirectResponse(url="/login", status_code=302)
-    clean_filename = salvar_upload(video_file, VIDEOS_DIR, {".mp4", ".webm", ".ogg", ".mov"})
-    if not clean_filename:
-        return RedirectResponse(url="/admin", status_code=302)
-
-    conn = sqlite3.connect("esaqui.db")
-    conn.cursor().execute(
-        "INSERT INTO aulas (curso_id, modulo, titulo, url_video) VALUES (?, ?, ?, ?)",
-        (curso_id, modulo, titulo, f"/static/videos/{clean_filename}"),
-    )
-    conn.commit()
-    conn.close()
-    return RedirectResponse(url="/admin", status_code=302)
-
-
-@app.get("/chat-aluno", response_class=HTMLResponse)
-def carregar_chat_aluno(request: Request, aluno_id: int):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    historico = conn.cursor().execute(
-        "SELECT * FROM mensagens_chat WHERE aluno_id = ? ORDER BY id ASC", (aluno_id,)
-    ).fetchall()
-    conn.close()
-    return templates.TemplateResponse(request, "chat_aluno.html", context={
-        "aluno_id": aluno_id,
-        "historico": historico,
-    })
-
-
-@app.post("/chat-aluno/enviar")
-def aluno_enviar_mensagem(request: Request, aluno_id: int, conteudo: str = Form(...)):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    if conteudo.strip():
-        conn = sqlite3.connect("esaqui.db")
-        conn.cursor().execute(
-            "INSERT INTO mensagens_chat (aluno_id, remetente, conteudo, data_envio) VALUES (?, 'aluno', ?, ?)",
-            (aluno_id, conteudo.strip(), datetime.now().strftime("%H:%M")),
-        )
-        conn.commit()
-        conn.close()
-    return RedirectResponse(url=f"/chat-aluno?aluno_id={aluno_id}", status_code=302)
-
-
-@app.get("/perfil-aluno", response_class=HTMLResponse)
-def perfil_aluno(request: Request, aluno_id: int):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    aluno = conn.cursor().execute("SELECT * FROM usuarios WHERE id = ? AND role = 'aluno'", (aluno_id,)).fetchone()
-    conn.close()
-    if not aluno:
-        return RedirectResponse(url="/login", status_code=302)
-    dados = dict(aluno)
-    dados["email"] = descriptografar_email(dados["email"]) or dados["email"]
-    return templates.TemplateResponse(request, "perfil_aluno.html", context={"aluno": dados, "sucesso": None})
-
-
-@app.post("/perfil-aluno/atualizar")
-async def atualizar_perfil_aluno(
-    request: Request,
-    aluno_id: int,
-    nome: str = Form(...),
-    telefone: str = Form(...),
-    email: str = Form(...),
-    foto_file: UploadFile = File(None),
-):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    nome = nome.strip()
-    telefone = telefone.strip()
-    email = normalizar_email(email)
-    if not nome or not telefone or "@" not in email:
-        return RedirectResponse(url=f"/perfil-aluno?aluno_id={aluno_id}", status_code=302)
-
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    outro_usuario = buscar_usuario_por_email(conn, email)
-    if outro_usuario and outro_usuario["id"] != aluno_id:
-        conn.close()
-        return RedirectResponse(url=f"/perfil-aluno?aluno_id={aluno_id}", status_code=302)
-    foto = salvar_upload(foto_file, FOTOS_DIR, {".jpg", ".jpeg", ".png", ".webp"})
-    campos = ["nome = ?", "telefone = ?", "email = ?"]
-    valores = [nome, telefone, criptografar_email(email)]
-    if foto:
-        campos.append("foto = ?")
-        valores.append(f"/static/fotos/{foto}")
-    valores.append(aluno_id)
-    conn.execute(f"UPDATE usuarios SET {', '.join(campos)} WHERE id = ?", valores)
-    conn.commit()
-    conn.close()
-    request.session["usuario"]["email"] = email
-    return RedirectResponse(url=f"/perfil-aluno?aluno_id={aluno_id}", status_code=302)
-
-
-@app.post("/upload-comprovativo")
-async def upload_comprovativo(
-    request: Request,
-    aluno_id: int,
-    file: UploadFile = File(...),
-):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    nome_arquivo = salvar_upload(file, UPLOAD_DIR, {".jpg", ".jpeg", ".png", ".pdf", ".webp"})
-    if nome_arquivo:
-        conn = sqlite3.connect("esaqui.db")
-        conn.execute(
-            "UPDATE matriculas SET comprovativo = ?, status_pagamento = 'Pendente' WHERE aluno_id = ?",
-            (f"/comprovativos/{nome_arquivo}", aluno_id),
-        )
-        conn.commit()
-        conn.close()
-    return RedirectResponse(url=f"/dashboard?aluno_id={aluno_id}", status_code=302)
-
-
-@app.get("/dashboard-professor", response_class=HTMLResponse)
-def dashboard_professor(request: Request, professor_id: int):
-    usuario = exigir_login(request, {"professor"})
-    if not usuario or usuario["id"] != professor_id:
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    professor = conn.cursor().execute(
-        "SELECT * FROM usuarios WHERE id = ? AND role = 'professor'", (professor_id,)
-    ).fetchone()
-    alunos = conn.cursor().execute(
-        """SELECT u.nome, u.telefone, n.nota, n.resultado
-           FROM usuarios u
-           JOIN matriculas m ON m.aluno_id = u.id
-           LEFT JOIN notas n ON n.aluno_id = u.id
-           WHERE u.role = 'aluno'
-           ORDER BY u.nome"""
-    ).fetchall()
-    conn.close()
-    if not professor:
-        return RedirectResponse(url="/login", status_code=302)
-    dados = dict(professor)
-    dados["email"] = descriptografar_email(dados["email"]) or dados["email"]
-    return templates.TemplateResponse(request, "dashboard_professor.html", context={
-        "professor": dados,
-        "alunos": alunos,
-    })
-
-
-@app.post("/perfil-professor/atualizar")
-async def atualizar_perfil_professor(
-    request: Request,
-    professor_id: int,
-    nome: str = Form(...),
-    telefone: str = Form(...),
-    foto_file: UploadFile = File(None),
-):
-    usuario = exigir_login(request, {"professor"})
-    if not usuario or usuario["id"] != professor_id:
-        return RedirectResponse(url="/login", status_code=302)
-    foto = salvar_upload(foto_file, FOTOS_DIR, {".jpg", ".jpeg", ".png", ".webp"})
-    campos = ["nome = ?", "telefone = ?"]
-    valores = [nome.strip(), telefone.strip()]
-    if foto:
-        campos.append("foto = ?")
-        valores.append(f"/static/fotos/{foto}")
-    valores.append(professor_id)
-    conn = sqlite3.connect("esaqui.db")
-    conn.execute(f"UPDATE usuarios SET {', '.join(campos)} WHERE id = ?", valores)
-    conn.commit()
-    conn.close()
-    return RedirectResponse(url=f"/dashboard-professor?professor_id={professor_id}", status_code=302)
-
-
-PERGUNTAS_PROVA = [
-    {"id": 1, "texto": "Qual é a principal função de um sistema ERP?", "a": "Integrar processos de gestão", "b": "Editar fotografias", "c": "Criar redes sociais", "correta": "a"},
-    {"id": 2, "texto": "O que representa o stock numa empresa?", "a": "Apenas o dinheiro em caixa", "b": "Os bens disponíveis para operação ou venda", "c": "A lista de funcionários", "correta": "b"},
-    {"id": 3, "texto": "Qual prática ajuda a proteger uma conta?", "a": "Partilhar a senha", "b": "Usar a mesma senha em tudo", "c": "Usar uma senha forte e exclusiva", "correta": "c"},
-]
-
-
-@app.get("/prova", response_class=HTMLResponse)
-def tela_prova(request: Request, aluno_id: int):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    return templates.TemplateResponse(request, "prova.html", context={
-        "aluno_id": aluno_id,
-        "perguntas": PERGUNTAS_PROVA,
-    })
-
-
-@app.post("/submeter-prova")
-async def submeter_prova(request: Request, aluno_id: int):
-    usuario = exigir_login(request, {"aluno"})
-    if not usuario or usuario["id"] != aluno_id:
-        return RedirectResponse(url="/login", status_code=302)
-    formulario = await request.form()
-    acertos = sum(1 for pergunta in PERGUNTAS_PROVA if formulario.get(f"q{pergunta['id']}") == pergunta["correta"])
-    nota = round(acertos * 20 / len(PERGUNTAS_PROVA), 2)
-    resultado = "Aprovado" if nota >= 10 else "Reprovado"
-    conn = sqlite3.connect("esaqui.db")
-    conn.execute("DELETE FROM notas WHERE aluno_id = ?", (aluno_id,))
-    conn.execute("INSERT INTO notas (aluno_id, nota, resultado) VALUES (?, ?, ?)", (aluno_id, nota, resultado))
-    conn.commit()
-    conn.close()
-    return RedirectResponse(url=f"/dashboard?aluno_id={aluno_id}", status_code=302)
-
-
-def emitir_certificado(conn, aluno_id: int):
-    dados = conn.execute(
-        """SELECT u.nome, c.id AS curso_id, c.nome AS curso_nome, n.nota
-           FROM usuarios u
-           JOIN matriculas m ON m.aluno_id = u.id
-           JOIN cursos c ON c.id = m.curso_id
-           JOIN notas n ON n.aluno_id = u.id
-           WHERE u.id = ? AND m.status_pagamento = 'Aprovado' AND n.resultado = 'Aprovado'""",
-        (aluno_id,),
-    ).fetchone()
-    if not dados:
-        return None
-    existente = conn.execute(
-        "SELECT * FROM certificados WHERE aluno_id = ? AND curso_id = ?",
-        (aluno_id, dados["curso_id"] if isinstance(dados, sqlite3.Row) else dados[1]),
-    ).fetchone()
-    if existente:
-        return existente
-
-    codigo = f"ESAQUI-{datetime.now().strftime('%Y%m')}-{secrets.token_hex(5).upper()}"
-    arquivo = f"certificado_{aluno_id}_{codigo}.pdf"
-    caminho = os.path.join(CERTIFICADOS_DIR, arquivo)
-    estilos = getSampleStyleSheet()
-    titulo = ParagraphStyle("TituloCertificado", parent=estilos["Title"], alignment=TA_CENTER, fontSize=26, spaceAfter=28)
-    centro = ParagraphStyle("CentroCertificado", parent=estilos["Normal"], alignment=TA_CENTER, fontSize=15, leading=24)
-    documento = SimpleDocTemplate(caminho, pagesize=landscape(letter), leftMargin=70, rightMargin=70, topMargin=65, bottomMargin=65)
-    nome = dados["nome"] if isinstance(dados, sqlite3.Row) else dados[0]
-    curso_nome = dados["curso_nome"] if isinstance(dados, sqlite3.Row) else dados[2]
-    nota = dados["nota"] if isinstance(dados, sqlite3.Row) else dados[3]
-    documento.build([
-        Paragraph("ESAQUI", titulo),
-        Paragraph("CERTIFICADO DE CONCLUSÃO", titulo),
-        Spacer(1, 18),
-        Paragraph(f"Certificamos que <b>{nome}</b> concluiu a formação", centro),
-        Paragraph(f"<b>{curso_nome}</b>", centro),
-        Paragraph(f"com aproveitamento de {nota}/20.", centro),
-        Spacer(1, 30),
-        Paragraph(f"Código de verificação: {codigo}", centro),
-        Paragraph(f"Emitido em {datetime.now().strftime('%d/%m/%Y')}", centro),
-    ])
-    emitido_em = datetime.now().isoformat(timespec="seconds")
-    conn.execute(
-        "INSERT INTO certificados (aluno_id, curso_id, codigo, arquivo, emitido_em) VALUES (?, ?, ?, ?, ?)",
-        (aluno_id, dados["curso_id"] if isinstance(dados, sqlite3.Row) else dados[1], codigo, arquivo, emitido_em),
-    )
-    conn.commit()
-    return conn.execute("SELECT * FROM certificados WHERE codigo = ?", (codigo,)).fetchone()
-
-
-@app.get("/certificado/{codigo}")
-def baixar_certificado(request: Request, codigo: str):
-    usuario = exigir_login(request)
-    if not usuario:
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    certificado = conn.execute("SELECT * FROM certificados WHERE codigo = ?", (codigo,)).fetchone()
-    permitido = certificado and (usuario["role"] == "admin" or certificado["aluno_id"] == usuario["id"])
-    conn.close()
-    if not permitido:
-        raise HTTPException(status_code=404, detail="Certificado não encontrado")
-    caminho = os.path.join(CERTIFICADOS_DIR, certificado["arquivo"])
-    if not os.path.isfile(caminho):
-        raise HTTPException(status_code=404, detail="Arquivo do certificado não encontrado")
-    return FileResponse(caminho, filename=certificado["arquivo"], media_type="application/pdf")
-
-
-@app.get("/certificado/emitir/{aluno_id}")
-def gerar_certificado(request: Request, aluno_id: int):
-    usuario = exigir_login(request, {"aluno", "admin"})
-    if not usuario or (usuario["role"] == "aluno" and usuario["id"] != aluno_id):
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    certificado = emitir_certificado(conn, aluno_id)
-    conn.close()
-    if not certificado:
-        return RedirectResponse(url=f"/dashboard?aluno_id={aluno_id}", status_code=302)
-    return RedirectResponse(url=f"/certificado/{certificado['codigo']}", status_code=302)
-
-
-@app.post("/analytics/heartbeat")
-def analytics_heartbeat(request: Request, duracao_segundos: int = Form(...)):
-    visitante = request.session.get("visitante_id")
-    if not visitante:
-        visitante = secrets.token_hex(16)
-        request.session["visitante_id"] = visitante
-    duracao = max(0, min(duracao_segundos, 86400))
-    conn = sqlite3.connect("esaqui.db")
-    conn.execute(
-        "UPDATE visitas SET duracao_segundos = ?, ultimo_sinal = ? WHERE id = (SELECT id FROM visitas WHERE visitante_hash = ? ORDER BY id DESC LIMIT 1)",
-        (duracao, datetime.now().isoformat(timespec="seconds"), hash_visitante(visitante)),
-    )
-    conn.commit()
-    conn.close()
-    return JSONResponse({"ok": True})
-
-
-@app.get("/admin/engajamento", response_class=HTMLResponse)
-def painel_engajamento(request: Request):
-    if not exigir_login(request, {"admin"}):
-        return RedirectResponse(url="/login", status_code=302)
-    conn = sqlite3.connect("esaqui.db")
-    conn.row_factory = sqlite3.Row
-    resumo = conn.execute(
-        """SELECT COUNT(*) AS visitas, COUNT(DISTINCT visitante_hash) AS visitantes,
-                  COALESCE(AVG(duracao_segundos), 0) AS media_segundos,
-                  COALESCE(SUM(duracao_segundos), 0) AS total_segundos
-           FROM visitas"""
-    ).fetchone()
-    rotas = conn.execute(
-        "SELECT rota, COUNT(*) AS total FROM visitas GROUP BY rota ORDER BY total DESC LIMIT 10"
-    ).fetchall()
-    conn.close()
-    financeiro = calcular_resumo_financeiro()
-    return templates.TemplateResponse(request, "engajamento.html", context={
-        "resumo": resumo,
-        "rotas": rotas,
-        "financeiro": financeiro,
-    })
-
-
-@app.get("/admin/contas-digitais", response_class=HTMLResponse)
-def contas_digitais_admin(request: Request):
-    if not exigir_login(request, {"admin"}):
-        return RedirectResponse(url="/login", status_code=302)
-    financeiro = calcular_resumo_financeiro()
-    return templates.TemplateResponse(request, "contas_digitais.html", context={
-        "bybit_account": BYBIT_ACCOUNT or "Não configurada",
-        "airtm_account": AIRM_ACCOUNT or "Não configurada",
-        "financeiro": financeiro,
-    })
-
-
-from fastapi.responses import PlainTextResponse # Verifique se tem este import no topo ou use aqui dentro
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def get_robots_txt():
