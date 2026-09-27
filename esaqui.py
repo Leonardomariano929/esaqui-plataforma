@@ -36,10 +36,11 @@ WHATSAPP_MESSAGE = os.environ.get("WHATSAPP_MESSAGE", "Olá, gostaria de assist�
 FACEBOOK_URL = os.environ.get("FACEBOOK_URL", "https://facebook.com")
 
 def obter_conexao():
-    # URL corrigida apontando para o servidor Pooler IPv4 com o ID do seu projeto
-    url_direta = "postgresql://postgres.brrxykljoruybwfkuryo:COLOQUE_AQUI_A_SUA_SENHA_NOVA@://supabase.com"
-    
-    return psycopg2.connect(url_direta)
+    # Puxa o link seguro que configuraremos no painel do Render
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        raise ValueError("A variável DATABASE_URL não foi definida no Render!")
+    return psycopg2.connect(database_url)
 
 def carregar_configuracao(chave: str, padrao: str = "") -> str:
     conn = obter_conexao()
